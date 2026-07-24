@@ -1,0 +1,81 @@
+{% extends "base.html" %} 
+
+{% block css %}
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/add_product.css')}}">
+
+
+{% endblock %}
+
+
+
+
+
+
+{% block content %}
+
+<h1> Welcome {{admin.username}} </h1>
+
+<form action="/inventory" enctype="multipart/form-data" method="post">
+           
+<!-- {{ csrf_token }} -->
+
+<input type="number" name="product_id" placeholder="product id "></input>
+<input type="text" name="name" placeholder=" product name"></input>
+<input type="text" name="slug" placeholder="Product Slug"></input>
+<input type="text" name="brand" placeholder="Brand"></input>
+<input type="number" name="price" placeholder="Product Price"></input>
+<select name="category" >
+
+    <option value="">Electronics</option>
+
+    <option value="">Clothes</option>
+
+    <option value="">Footwear</option>
+
+</select>
+
+<div id="json-attributes-container">
+        <!-- <div class="json-row">
+            <input type="text" name="json_keys[]" placeholder="Key (e.g., Color)">
+            <input type="text" name="json_values[]" placeholder="Value (e.g., Blue)">
+        </div> -->
+</div>
+
+<label for="">Product Image</label>
+
+<input type="file" name="file" accept="image/*">
+
+
+<button type="button" id="add-more-btn">Add More Attributes</button>
+
+
+
+<input type="submit">
+
+
+
+
+
+
+</form>
+
+
+
+
+
+{% endblock %}
+
+{%  block script %}
+
+<script type="text/javascript" src="{{url_for('static',filename='js/add_product.js')}}"></script>
+
+{% endblock %}
+
+
+
+
+
+
+
+

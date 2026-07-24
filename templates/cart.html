@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+
+{% block css %}
+
+
+<link rel="stylesheet" href="{{url_for('static',filename='css/cart.css')}}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="wrapper">
+
+    <h1 class="total">{{total}}INR</h1>
+    <table>
+        <thead>
+            <tr>
+                <td><h1>Name</h1></td>
+                <td><h1>Price</h1></td>
+                <td><h1>Quantity</h1></td>
+                <td><h1>Subtotal</h1></td>
+
+            </tr>
+
+
+        </thead>
+
+        <tbody>
+
+            {% for item in products %}
+
+                <tr>
+                    <td>{{item.name}}</td>
+                    <td>{{item.price}}</td>
+                    <td>{{item.quantity}}</td>
+                    <td>{{item.subtotal}} </td>
+
+
+                </tr>
+
+
+
+            {% endfor %}
+
+
+
+        </tbody>
+
+
+
+
+
+    </table>
+    <button onclick="handle_logic()">PLACE ORDER</button>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+{% endblock %}
+
+
+{% block script %}
+
+
+<script type="text/javascript" src="{{url_for('static',filename='js/cart.js')}}"></script>
+
+
+
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block css %}
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/products.css')}}">
+
+
+{% endblock %}
+
+{% block lol %}
+
+        <ul class="pagination">
+
+            {% if pagination.has_prev %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('get_products', page=pagination.prev_num) }}">Previous</a></li>
+                {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == pagination.page %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('get_products', page=page_num) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+            {% endfor %}
+
+            
+            {% if pagination.has_next %}
+                        <li class="page-item"><a class="page-link" href="{{ url_for('get_products', page=pagination.next_num) }}">Next</a></li>
+                {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                    {% endif %}
+
+
+
+
+
+        </ul>
+
+
+
+
+
+{% endblock %}
+
+
+
+{% block content %}
+
+{% if user %}
+    <h1> hi {{user.username}} ! products shows here </h1>
+    <p>{{user.profile_url}}</p>   
+<img src="{{ url_for('static', filename='uploads/' + user.profile_url) }}" alt="User Image" class="test">
+
+{% endif %}
+
+<div class="products">
+
+    {% include "components/products_header.html" %}
+    
+
+    {% if products %}
+        {% for product in products %}
+
+
+            <div class="card loaded">  
+
+            <div class="product_image"> 
+
+                <img src="{{url_for('static',filename='uploads/'+product.image_url)}}"  alt="" >
+
+
+                </div>
+
+            
+            <h1 class="product_name">{{ product.name}} </h1>
+
+             <form  class="form_add_cart" onsubmit="handleCartEvent(event,{{ product.product_id }})">
+
+                <input id="qty-{{product.product_id}}" type="number"  min="1" value="1" max="99" placeholder="quantity" required>
+                <button type="submit">Add To Cart</button>
+
+
+             </form>
+
+
+            <p class="product_price ">{{ product.price }}</p>
+
+
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+            {% for count in range(10) %}
+
+        
+                <div class="card-skeleton"></div>
+            
+            
+            {% endfor   %}
+
+    
+
+    {% endif %}
+
+</div>
+    
+
+
+
+
+
+
+
+{% endblock %} 
+
+
+{% block script %}
+
+
+    <script type="text/javascript" src="{{url_for('static',filename='js/products.js')}}"></script>
+
+
+
+
+
+{% endblock %}

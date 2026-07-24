@@ -1,0 +1,66 @@
+
+{% extends "base.html" %}
+
+{% block css  %} 
+
+    <link rel="stylesheet" href="{{url_for('static',filename='css/signup.css')}}">
+
+{% endblock %}
+
+{% block content %}
+
+    <form method="post" action="/register"  enctype="multipart/form-data">
+
+            {{ form.csrf_token }}
+
+
+     <p>  {{ form.username.label }}<br>
+            {{ form.username(size=30) }}  </p>
+
+        
+      <p>  {{ form.email.label }}<br>
+            {{ form.email(size=30) }}  </p>
+
+        <p>  {{ form.password.label }}<br>
+            {{ form.password(size=30) }}  </p>
+
+
+        <p>{{form.profile_picture.label }} 
+            
+            {{form.profile_picture()}}
+        
+        </p>
+
+    
+
+
+        <p>{{form.submit()}}</p>
+
+        </form>
+
+
+        {% if errors %}
+        
+            <div> 
+
+
+                 {% if errors %}
+        <ul style="color: red; padding: 0.5rem; border: 0.25rem solid black;" >
+                {% for field, field_errors in errors.items() %}
+                    {% for error in field_errors %}
+                        <li><strong>{{ field.capitalize() }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                </ul>
+            {% endif %}
+
+
+            </div>
+            
+            
+
+        {% endif %}
+
+
+
+{% endblock %}

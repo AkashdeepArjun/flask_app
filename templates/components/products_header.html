@@ -1,0 +1,21 @@
+{% extends "./components/header.html" %}
+
+{% block content %}
+
+
+<div class="search_container">
+    <input type="text" placeholder="search products here" id="search_box" autocomplete="off">
+    <div id="suggestion-box">
+
+    <div id="suggestion-list"></div>
+    
+    <div id="loading-indicator">
+        <p>Loading...</p>
+    </div>
+
+    </div>
+    
+
+</div>
+
+{% endblock %}

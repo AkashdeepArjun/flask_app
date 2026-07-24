@@ -1,0 +1,18 @@
+html{
+    font-size: 16px;
+}
+
+body{
+    background-color: rgb(221, 225, 177);
+    display: flex;
+    justify-content: center;
+}
+
+form {
+
+    position: absolute;
+    padding:  1rem;
+    border: 0.075rem solid brown;
+    top: 25%;
+
+}

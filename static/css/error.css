@@ -1,0 +1,35 @@
+.error_details{
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 1rem;
+
+    width: 400px;
+
+    height: 400px;
+
+    border: 0.025rem solid orange;
+
+    justify-self: center;
+
+
+}
+
+.error_details > img {
+
+    aspect-ratio:  4 /9 ;
+   
+    object-fit: contain;
+
+    width:16rem;
+
+    height: 16rem;
+
+
+}

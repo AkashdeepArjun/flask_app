@@ -1,0 +1,17 @@
+
+{% extends "base.html" %}   
+
+{% block content %}
+
+     <form action="/signup" method="post">
+
+        <p>  {{ form.name.label }}<br>
+            {{ form.name(size=30) }}  </p>
+
+        <p>{{form.submit()}}</p>
+
+     </form>
+
+
+
+{% endblock %}

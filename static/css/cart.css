@@ -1,0 +1,89 @@
+
+
+.wrapper {
+
+    width: 100%;
+
+    height: max-content;
+
+    display: flex;
+
+    flex-direction:  column;
+
+    /* justify-self: center; */
+
+    position:relative;
+
+    margin-top: rem;
+
+    border:0.025rem solid gray;
+
+    padding: 0.125rem;
+
+
+
+
+
+}
+
+
+
+table {
+
+    display:  table !important;
+     border-collapse: collapse;
+    flex-grow: 1;
+    width: 100%;
+    table-layout: fixed;
+
+}
+
+
+td {
+    padding: 0.125rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wrapper>h1{
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+
+thead {
+  display: table-header-group !important;
+}
+
+tbody {
+  display: table-row-group !important;
+}
+
+/* Force rows to display horizontally across columns */
+tr {
+  display: table-row !important;
+}
+
+
+th, td {
+  display: table-cell !important;
+  text-align: left; /* Adjust alignment as needed */
+  padding: 12px;    /* Optional spacing */
+}
+
+button {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: green;
+    padding-inline: 0.25rem;
+    padding-block: 0.125rem;
+    text-align: center;
+    color: white;
+} 
+
+thead > tr >td {
+  border-bottom: 0.25rem solid black;
+}

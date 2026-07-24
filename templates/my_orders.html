@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders</title>
+    <link rel="stylesheet" href="{{url_for('static',filename='css/my_orders.css')}}">
+</head>
+<body>
+
+    {% if orders %}
+    <div class="wrapper"> 
+        <table>
+            <thead>
+                <tr>
+                   <th>order id</th> 
+                    <th> amount </th>   
+                    <th>created at</th>
+                </tr>
+
+           </thead>
+
+
+           <tbody>
+
+                {% for order in orders %}
+
+                    <tr>
+                        <td>
+                            <a href="my_orders/{{order.order_id}}"> ORDER REFERENCE</a>
+
+                        </td>
+
+                        <td>
+                            <p> {{ order.amount}}</p>
+                        </td>
+
+                        <td>
+
+                            <p> {{ order.created_at}}   </p>
+
+
+                        </td>
+
+
+                    </tr>
+
+
+
+
+
+                {% endfor %}
+
+
+           </tbody>
+
+
+
+
+
+
+        </table>
+
+
+
+
+
+    </div>
+
+
+
+
+
+    {% else %}
+
+        <div class="empty">
+
+            <h1 class="error_message">Data not found!</h1>
+
+
+
+        </div>
+
+
+    {% endif %}
+
+    
+
+    
+
+
+
+    
+</body>
+</html>

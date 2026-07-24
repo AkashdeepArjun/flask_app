@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block css %}
+
+<link rel="stylesheet" href="{{url_for('static',filename='css/product_detail.css')}}">
+
+{% endblock %}
+
+
+{% block content %}
+
+
+    {% if product and product!="None" %}
+
+
+
+            <div class="card">
+
+                        <div class="image_wrapper loaded">
+
+
+                            <!-- <img src="{{url_for('static',filename='uploads')}}" alt=""> -->
+                            <img src="{{url_for('static',filename='uploads/'+product.image_url)}}"  alt="" >
+                            
+
+                        </div>
+
+            </div>
+
+    {% else %}
+
+            
+        <div class="card">
+
+                    <div class="image_wrapper">
+
+
+
+                    </div>
+
+        </div>
+
+    {% endif %}
+
+
+
+
+
+
+
+
+
+{% endblock %}
+

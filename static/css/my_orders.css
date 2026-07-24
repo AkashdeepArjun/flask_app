@@ -1,0 +1,109 @@
+.wrapper {
+
+    width: 100%;
+
+    height: max-content;
+
+    display: flex;
+
+    flex-direction:  column;
+
+    /* justify-self: center; */
+
+    position:relative;
+
+    margin-top: rem;
+
+    border:0.025rem solid gray;
+
+    padding: 0.125rem;
+
+}
+
+th{
+
+    text-transform: uppercase;
+}
+
+
+
+table {
+
+    display:  table !important;
+     border-collapse: collapse;
+    flex-grow: 1;
+    width: 100%;
+    table-layout: fixed;
+
+}
+
+
+
+
+.empty {
+
+    width: 600px ;
+
+    height: 400px;
+    
+    border: 0.025rem solid brown;
+
+    position: absolute;
+
+    top: 35%;
+
+    left: 25%;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    
+
+
+}
+
+.error_message {
+
+    color:red;
+}
+
+thead > tr >td {
+  border-bottom: 0.25rem solid black;
+}
+
+tr {
+  display: table-row !important;
+}
+
+
+
+
+
+
+
+td {
+    padding: 0.125rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+th, td {
+  display: table-cell !important;
+  text-align: left; /* Adjust alignment as needed */
+  padding: 12px;    /* Optional spacing */
+} 
+
+
+
+thead {
+  display: table-header-group !important;
+}
+
+tbody {
+  display: table-row-group !important;
+}
