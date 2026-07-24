@@ -110,7 +110,7 @@ def login_required(f):
     return login_middleware
 
 
-@app.route('/test_route')
+@app.route('/tester')
 def test_route():
     return f"Github workflow is working"
 
