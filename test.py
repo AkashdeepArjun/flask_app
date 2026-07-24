@@ -30,6 +30,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from flask_cors import CORS 
 
+from flask_limiter import Limiter
+
+from flask_limiter.util import get_remote_address
+
+
 global message
 
 global projects 
@@ -47,6 +52,14 @@ try:
     app = InstanceManager.get_instance(flask.Flask,__name__)
 
     CORS(app=app)
+
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day","50 per hour"],
+        storage_uri="memory://"
+
+    )
 
     
 
@@ -67,6 +80,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),'static','uploads')
 
 
+
+@app.errorhandler(429)
+def show_message(e):
+    return flask.jsonify({"error":"hit limits","message":"exceeded request limit"}),429
 
 
 db.init_app(app)
@@ -498,6 +515,7 @@ def logout():
 
 
 @app.route('/login',methods =['GET','POST'])
+@limiter.limit("5 per minute")
 def login_user():
     existing_user_client = flask.request.cookies.get('user') 
     existing_user_server = flask.session.get('user')
