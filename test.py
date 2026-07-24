@@ -110,6 +110,11 @@ def login_required(f):
     return login_middleware
 
 
+@app.route('/test_route')
+def test_route():
+    return f"Github workflow is working"
+
+
 @app.route('/cart/add',methods=['POST'])
 @login_required
 def add_to_cart():
