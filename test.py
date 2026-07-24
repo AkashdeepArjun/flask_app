@@ -751,10 +751,10 @@ def home():
 #     return f"<h1>Value of x: {arg_x}</h1>"
 
 
-@app.route("/test_route")
-def test_route():
-    arg_x = flask.request.args.get("x", "No parameter provided")
-    return f"<h1>Value of x: {escape(arg_x)}</h1>"
+# @app.route("/test_route")
+# def test_route():
+#     arg_x = flask.request.args.get("x", "No parameter provided")
+#     return f"<h1>Value of x: {escape(arg_x)}</h1>"
 
 @app.route("/myroute/<name>")
 def myroute(name):
