@@ -1,9 +1,11 @@
-import sys
 import os
+import sys
 
-# Add the current directory (project root) to Python's system path
-# This allows test.py to find database, data, pack, and utils modules seamlessly!
+# Tell Passenger explicitly which Python virtualenv to use
+INTERP = os.path.expanduser('~/virtualenv/flask_app/3.11/bin/python')
+if sys.executable != INTERP:
+    os.execl(INTERP, INTERP, *sys.argv)
+
 sys.path.insert(0, os.path.dirname(__file__))
 
-# Import the Flask app object from test.py and alias it as 'application'
 from test import app as application
