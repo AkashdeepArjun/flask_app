@@ -82,7 +82,7 @@ app.config.update(
 )
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40mysql@localhost:3309/dev"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40mysql@localhost/dev"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 
