@@ -34,7 +34,7 @@ from flask_limiter import Limiter
 
 from flask_limiter.util import get_remote_address
 
-from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
 
 from email.mime.multipart import MIMEMultipart
@@ -105,7 +105,7 @@ SMTP_PORT = 465
 SMTP_USER = 'akash@laziakeey.in'
 SMTP_PASS = 'akash@cpanel007007'
 
-mail = Mail(app)
+# mail = Mail(app)
 
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY']) 
 
