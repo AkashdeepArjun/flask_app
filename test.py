@@ -34,6 +34,15 @@ from flask_limiter import Limiter
 
 from flask_limiter.util import get_remote_address
 
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadTimeSignature
+
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+from email.utils import make_msgid
+
+import smtplib
 
 global message
 
@@ -73,11 +82,169 @@ app.config.update(
 )
 
 
-app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40mysql@localhost/dev"
+app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40mysql@localhost:3309/dev"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),'static','uploads')
+
+#mail settings 
+# app.config['MAIL_SERVER'] = 'mail.laziakeey.in' 
+app.config['MAIL_SERVER'] = 'sg2plzcpnl508264.prod.sin2.secureserver.net'   # Server host from cPanel
+  # Server host from cPanel
+app.config['MAIL_PORT'] = 465                  # Usually 465 for SSL
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USERNAME'] = 'akash@laziakeey.in'
+app.config['MAIL_PASSWORD'] = 'akash@cpanel007007'
+app.config['MAIL_DEFAULT_SENDER'] = 'akash@laziakeey.in'
+app.config['SECURITY_PASSWORD_SALT'] = 'akash@la007'
+
+SMTP_SERVER = 'sg2plzcpnl508264.prod.sin2.secureserver.net'
+SMTP_PORT = 465
+SMTP_USER = 'akash@laziakeey.in'
+SMTP_PASS = 'akash@cpanel007007'
+
+mail = Mail(app)
+
+serializer = URLSafeTimedSerializer(app.config['SECRET_KEY']) 
+
+def generate_verification_token(email): #server side 
+
+    return serializer.dumps(email,app.config['SECURITY_PASSWORD_SALT'])
+
+def confirm_token(token,expiration=1800): #client side clicks verification will done at server 
+    try:
+        email = serializer.loads(token,
+                                 salt=app.config['SECURITY_PASSWORD_SALT'],max_age=expiration)
+
+        return email
+
+    except (SignatureExpired,BadTimeSignature):
+        return None
+
+
+def send_mail_logic(reciever,subject,body,body_html=None):
+    msg = MIMEMultipart("alternative")
+    msg['Subject'] = subject 
+    msg['From'] = f'LaziAkeey <{app.config['MAIL_USERNAME']}'
+    msg['To'] = reciever
+    msg['Message-ID'] = make_msgid(domain='laziakeey.in')
+
+    msg.attach(MIMEText(body, 'plain'))
+
+    if body_html:
+        msg.attach(MIMEText(body_html, 'html'))
+
+    with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, timeout=10) as server:
+        server.login(SMTP_USER, SMTP_PASS)
+        server.sendmail(SMTP_USER, [reciever], msg.as_string())
+
+
+
+
+@app.route('/send_verification',methods=['POST'])
+def send_verification():
+
+    data = flask.request.get_json() or {}
+
+    email = data.get('email',None)
+
+#check if valid mail is sent by user
+    if not email:
+        return flask.jsonify({"error":"email required"}),400
+
+    token = generate_verification_token(email=email)
+
+    verify_mail = f"https://laziakeey.in/verify-email/{token}"
+
+    body= f"""Hello,
+
+        Thank you for signing up with Laziakeey.
+
+        Please verify your email address by clicking the link below:
+        {verify_mail}
+
+        If you did not request this email, please ignore it.
+
+        Best regards,
+        Laziakeey Team
+""" 
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+            <h2 style="color: #0284c7;">Welcome to Laziakeey</h2>
+            <p>Please confirm your email address to complete your account setup.</p>
+            <div style="margin: 25px 0;">
+                <a href="{verify_mail}" style="background-color: #0284c7; color: #ffffff; padding: 12px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email Address</a>
+            </div>
+            <p style="font-size: 13px; color: #666;">Or copy and paste this link into your browser:</p>
+            <p style="font-size: 13px; word-break: break-all; color: #0284c7;">{verify_mail}</p>
+        </div>
+    </body>
+    </html>
+    """
+
+
+
+    try:
+        send_mail_logic(reciever=email,subject='VERIFY MAIL',body=body,body_html=html_content)
+        return (
+            flask.jsonify({'success': True, 'message': 'Verification email sent!'}),
+            200,
+        )
+
+    except Exception as e:
+        return flask.jsonify({"error":str(e)}),400
+
+
+
+
+@app.route('/verify_email/<token>',methods=['GET'])
+def verify_email(token):
+
+    email = confirm_token(token)
+
+    if not email:
+        return flask.jsonify({"status":"failed","details":"token is expired "}),400
+
+    user = User.query.filter_by(email=email).first()
+
+
+    if not user:
+
+        return flask.jsonify({"status":"failed","details":"not such user exist "}),400
+
+
+    if user.email_verified_at is not None:
+        return flask.jsonify({"status":"success","message":"user is already verified"}) ,200
+
+
+    user.email_verified_at = datetime.datetime.now(datetime.datetime.utc)
+
+
+
+    try:
+
+        db.session.commit()
+
+        return flask.jsonify({"status":"success","message":"user is  verified"}) ,200
+
+
+
+
+    except Exception  as e :
+        db.session.rollback()
+        return flask.jsonify({"status":"Failed","message":str(e)}),400
+    
+
+
+
+
+
+
 
 
 
@@ -523,7 +690,7 @@ def login_user():
 
         user = User.query.filter_by(username=existing_user_server).first()
 
-        response = flask.make_response(flask.redirect(flask.url_for('products_page')), 302)
+        response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
 
         return response
         
