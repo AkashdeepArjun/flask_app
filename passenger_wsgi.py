@@ -9,3 +9,4 @@ if sys.executable != INTERP:
 sys.path.insert(0, os.path.dirname(__file__))
 
 from test import app as application
+#lol
