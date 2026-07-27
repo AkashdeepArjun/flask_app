@@ -127,7 +127,8 @@ def confirm_token(token,expiration=1800): #client side clicks verification will 
 def send_mail_logic(reciever,subject,body,body_html=None):
     msg = MIMEMultipart("alternative")
     msg['Subject'] = subject 
-    msg['From'] = f'LaziAkeey <{app.config['MAIL_USERNAME']}>'
+    # msg['From'] = f'LaziAkeey <{app.config['MAIL_USERNAME']}>'
+    msg['From'] = f"LaziAkeey <{app.config['MAIL_USERNAME']}>"
     msg['To'] = reciever
     msg['Message-ID'] = make_msgid(domain='laziakeey.in')
 
