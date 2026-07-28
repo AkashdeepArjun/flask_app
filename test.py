@@ -237,28 +237,36 @@ def send_verification():
 @app.route('/verify_email/<token>',methods=['GET'])
 def verify_email(token):
 
-    email = confirm_token(token)
-
-    if not email:
-        return flask.jsonify({"status":"failed","details":"token is expired "}),400
-
-    user = User.query.filter_by(email=email).first()
-
-
-    if not user:
-
-        return flask.jsonify({"status":"failed","details":"not such user exist "}),400
-
-
-    if user.email_verified_at is not None:
-        return flask.jsonify({"status":"success","message":"user is already verified"}) ,200
-
-
-    user.email_verified_at = datetime.datetime.now(datetime.datetime.utc)
+ 
 
 
 
     try:
+
+           
+        email = confirm_token(token)
+        
+        if not email:
+                
+            return flask.jsonify({"status":"failed","details":"token is expired "}),400
+        
+        user = User.query.filter_by(email=email).first()
+        
+        
+        if not user:
+        
+            return flask.jsonify({"status":"failed","details":"not such user exist "}),400
+        
+        
+        if user.email_verified_at is not None:
+            return flask.jsonify({"status":"success","message":"user is already verified"}) ,200
+        
+        
+        user.email_verified_at = datetime.datetime.now(datetime.datetime.utc)
+
+
+
+
 
         db.session.commit()
 
