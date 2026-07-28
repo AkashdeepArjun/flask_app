@@ -32,6 +32,10 @@ from flask_cors import CORS
 
 from flask_limiter import Limiter
 
+import logging
+from logging.handlers import RotatingFileHandler
+
+
 from flask_limiter.util import get_remote_address
 
 # from flask_mail import Mail, Message
@@ -59,6 +63,32 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
+
+
+# Set up logging to a local file inside your project folder
+    if not app.debug:
+        file_handler = RotatingFileHandler('flask_error.log', max_bytes=10240, backupCount=5)
+        file_handler.setFormatter(
+            logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        )
+    )
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+
+        app.logger.info('Flask application startup')
+
+
+
+
+
+
+
+
+
+
+
+
 
     CORS(app=app)
 
