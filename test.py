@@ -262,7 +262,7 @@ def verify_email(token):
             return flask.jsonify({"status":"success","message":"user is already verified"}) ,200
         
         
-        user.email_verified_at = datetime.datetime.now(datetime.datetime.utc)
+        user.email_verified_at = datetime.datetime.now(datetime.timezone.utc)
 
 
 
@@ -277,6 +277,7 @@ def verify_email(token):
 
     except Exception  as e :
         db.session.rollback()
+        app.logger.error(str(e))
         return flask.jsonify({"status":"Failed","message":str(e)}),400
     
 
