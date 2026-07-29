@@ -175,7 +175,7 @@ def send_mail_logic(reciever,subject,body,body_html=None):
 
 
 
-@app.route('/send_verification',methods=['POST'])
+@app.route('/api/send_verification',methods=['POST'])
 def send_verification():
 
     data = flask.request.get_json() or {}
@@ -234,7 +234,7 @@ def send_verification():
 
 
 
-@app.route('/verify_email/<token>',methods=['GET'])
+@app.route('/api/verify_email/<token>',methods=['GET'])
 def verify_email(token):
 
  
