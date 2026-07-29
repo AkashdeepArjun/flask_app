@@ -845,7 +845,7 @@ def get_products():
 
         # return jsonify({"products":products})
         # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-    return flask.jsonify({"status":"success","products":[p.to_dict() for p in products],"session exist":session_exist}),200
+    return flask.jsonify({"status":"success","products":[p.to_dict() for p in products]}),200
    
     
 
