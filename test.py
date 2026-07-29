@@ -46,6 +46,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from email.utils import make_msgid
+from werkzeug.middleware.proxy_fix import ProxyFix  
 
 import smtplib
 
@@ -64,6 +65,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
     CORS(app=app)
     csrf = CSRFProtect(app)
     
