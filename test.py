@@ -742,7 +742,7 @@ def logout():
 
 
 @app.route('/api/login',methods =['POST'])
-@limiter.limit("5 per minute")
+@limiter.limit("10 per minute")
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
 
