@@ -368,62 +368,65 @@ def login_required(f):
 @app.route('/api/cart/add',methods=['POST'])
 @login_required
 def add_to_cart():
-    data = flask.request.get_json() or {}
-
-    product_id = data.get("product_id")
-
-    quantity = data.get("quantity",1)
-
-    #  check for invalid product 
-    if not product_id or not isinstance(quantity,int) or quantity <1:
-        return flask.jsonify({"error":"invalid product id or quantity"}),400
-
-    # check if product exist 
-    product = Product.query.get(product_id)
-
-    if not product:
-        return flask.jsonify({"error":"product not found "}),400
-
-    user = flask.g.user
-
-    cart = user.cart
-
-    #  check if cart exist 
-    if not cart :
-        cart = Cart(user_id = user.id)
-        db.session.add(cart)
-        db.session.flush()
-
-    # check if product exist 
-    cart_item = CartProduct.query.filter_by(cart_id= cart.id,product_id=product_id).first()
-
-    if cart_item:
-        cart_item.quantity = quantity
-    else:
-        cart_item = CartProduct(cart_id=cart.id,product_id=product_id,quantity=quantity)
-
-    db.session.add(cart_item)
-
     try:
+        data = flask.request.get_json() or {}
+
+        product_id = data.get("product_id")
+
+        quantity = data.get("quantity",1)
+
+        #  check for invalid product 
+        if not product_id or not isinstance(quantity,int) or quantity <1:
+            return flask.jsonify({"error":"invalid product id or quantity"}),400
+
+        # check if product exist 
+        product = Product.query.get(product_id)
+
+        if not product:
+            return flask.jsonify({"error":"product not found "}),400
+
+        user = flask.g.user
+
+        cart = user.cart
+
+        #  check if cart exist 
+        if not cart :
+            cart = Cart(user_id = user.id)
+            db.session.add(cart)
+            db.session.flush()
+
+        # check if product exist 
+        cart_item = CartProduct.query.filter_by(cart_id= cart.id,product_id=product_id).first()
+
+        if cart_item:
+            cart_item.quantity = quantity
+        else:
+            cart_item = CartProduct(cart_id=cart.id,product_id=product_id,quantity=quantity)
+
+        db.session.add(cart_item)
+
+    
 
         db.session.commit()
 
 
-    except Exception as e:
+        
 
         db.session.rollback()
 
-        return flask.jsonify({"error":"database issue","details":str(e)})
+           
 
-    
-    return flask.jsonify({
-        "message": "Item added to cart successfully",
-        "cart_item": {
-            "product_id": cart_item.product_id,
-            "quantity": cart_item.quantity
-        }
-    }), 200
-    
+        
+        return flask.jsonify({
+            "message": "Item added to cart successfully",
+            "cart_item": {
+                "product_id": cart_item.product_id,
+                "quantity": cart_item.quantity
+            }
+        }), 200
+    except Exception as e :
+        app.logger.error(f"ADD TO CART ERROR :{str(e)}")
+        return flask.jsonify({"error":"database issue","details":str(e)})
 
 @app.route('/api/cart',methods=['GET'])
 @login_required
