@@ -72,11 +72,12 @@ try:
             storage_uri="memory://"
     
         )
-
-
+    #see if  works
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    log_file_path = os.path.join(basedir, 'flask_error.log')
 # Set up logging to a local file inside your project folder
     if not app.debug:
-        file_handler = RotatingFileHandler('flask_error.log', max_bytes=10240, backupCount=5)
+        file_handler = RotatingFileHandler(log_file_path, max_bytes=10240, backupCount=5)
         file_handler.setFormatter(
             logging.Formatter(
             '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
