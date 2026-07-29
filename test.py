@@ -833,10 +833,10 @@ def register_user():
 @app.route('/api/products',methods=['GET'])
 @csrf.exempt
 def get_products():
-    existing_user=flask.session['user']
-    session_exist = existing_user is not None
+    # existing_user=flask.session['user']
+    # session_exist = existing_user is not None
     
-    user_obj = User.query.filter_by(username=existing_user).first()
+    # user_obj = User.query.filter_by(username=existing_user).first()
     query = db.select(Product).order_by(Product.product_id)
     page = flask.request.args.get('page',1,type=int)
     per_page= flask.request.args.get('per_page',10,type=int)
