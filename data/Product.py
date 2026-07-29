@@ -41,4 +41,21 @@ class Product(db.Model):
 
 
 
+  
 
+
+    def to_dict(self):
+        data = {}
+        for column in self.__table__.columns:
+            val = getattr(self, column.name)
+
+        # Handle Decimal -> float
+            if isinstance(val, decimal.Decimal):
+                val = float(val)
+        # Handle datetime / date -> ISO string
+            elif isinstance(val, (datetime, date)):
+                val = val.isoformat()
+
+                data[column.name] = val
+        return data
+        
