@@ -84,6 +84,7 @@ try:
         )
     )
         file_handler.setLevel(logging.INFO)
+        app.logger.setLevel(logging.INFO)
         app.logger.addHandler(file_handler)
 
         app.logger.info('Flask application startup')
