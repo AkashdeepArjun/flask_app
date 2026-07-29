@@ -833,20 +833,20 @@ def register_user():
 @app.route('/api/products',methods=['GET'])
 @csrf.exempt
 def get_products():
-    # existing_user=flask.session['user']
-    # session_exist = existing_user is not None
-    
-    # user_obj = User.query.filter_by(username=existing_user).first()
-    query = db.select(Product).order_by(Product.product_id)
-    page = flask.request.args.get('page',1,type=int)
-    per_page= flask.request.args.get('per_page',10,type=int)
-    pagination = db.paginate(query,page=page,per_page=per_page)
-    products = pagination.items
+    try:
+        query = db.select(Product).order_by(Product.product_id)
+        page = flask.request.args.get('page',1,type=int)
+        per_page= flask.request.args.get('per_page',10,type=int)
+        pagination = db.paginate(query,page=page,per_page=per_page)
+        products = pagination.items
 
-        # return jsonify({"products":products})
-        # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-    return flask.jsonify({"status":"success","products":[p.to_dict() for p in products]}),200
-   
+            # return jsonify({"products":products})
+            # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
+        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products]}),200
+    except Exception as  e:
+
+        app.logger.error(f"DEKHO RE DEKHO AAYA ERROR  {str(e)} ")
+
     
 
 @app.route('/api/search-suggestions')
