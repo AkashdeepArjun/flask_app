@@ -106,6 +106,7 @@ try:
     
 
 except Exception as e:
+    app.logger.info(f"ERROR {str(e)}")
     print("ERRORRRR {} ".format(e))
 
 
