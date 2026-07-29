@@ -770,13 +770,15 @@ def login_user():
                     flask.session['user'] = user.username
                     flask.session['isLoggedIn'] = True
                     # response= flask.make_response(flask.render_template("products.html",user=user),201)
-                    response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
-                    response.set_cookie('user',user.username,15*60)                     
-                    return response
+                    # response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
+                    # response.set_cookie('user',user.username,15*60)                     
+                    return flask.jsonify({"status":"success","message":"login success"}),200
                 else:
-                    return f"Wrong Username or Password"
+                    return flask.jsonify({"status":"failed","message":"login failed"}),400
+                   
             else:
-                return f"user not found",404
+                    return flask.jsonify({"status":"failed","message":"no user found"}),200
+               
     except Exception as e:
         app.logger.info(f"ERROR OCCURED {str(e)}")
             
