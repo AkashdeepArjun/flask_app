@@ -831,6 +831,7 @@ def register_user():
 
 
 @app.route('/api/products')
+@csrf.exempt
 def get_products():
     existing_user=flask.session['user']
     session_exist = existing_user is not None
