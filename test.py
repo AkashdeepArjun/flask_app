@@ -196,7 +196,7 @@ def send_verification():
 
     token = generate_verification_token(email=email)
 
-    verify_mail = f"https://www.laziakeey.in/verify_email/{token}"
+    verify_mail = f"https://www.laziakeey.in/api/verify_email/{token}"
 
     body= f"""Hello,
 
