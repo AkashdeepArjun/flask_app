@@ -431,41 +431,48 @@ def add_to_cart():
 @app.route('/api/cart',methods=['GET'])
 @login_required
 def my_cart():
-    user = flask.g.user
+    try:
+        user = flask.g.user
 
-    cart = user.cart 
+        cart = user.cart 
 
-    if not cart :
-        # return flask.render_template("error.html",error="Cart is Empty")
-        return flask.jsonify({"status":"failed","message":"cart is empty"})
-    cart_items = CartProduct.query.filter_by(cart_id=cart.id).all()
-    items_list = []
+        if not cart :
+            # return flask.render_template("error.html",error="Cart is Empty")
+            return flask.jsonify({"status":"failed","message":"cart is empty"})
+        cart_items = CartProduct.query.filter_by(cart_id=cart.id).all()
+        items_list = []
 
-    total = 0
+        total = 0
 
-    for item in cart_items:
+        for item in cart_items:
 
-        product = item.product
+            product = item.product
 
-        if not product:
-            continue
+            if not product:
+                continue
 
-        sub_total = float(product.price)*item.quantity 
-        total+=sub_total
+            sub_total = float(product.price)*item.quantity 
+            total+=sub_total
 
-        items_list.append({
-            "product_id": product.product_id,
-            "name": product.name,
-            "brand": product.brand,
-            "price": float(product.price),
-            "quantity": item.quantity,
-            "image_url": product.image_url,
-            "subtotal": round(sub_total, 2)
-        })
+            items_list.append({
+                "product_id": product.product_id,
+                "name": product.name,
+                "brand": product.brand,
+                "price": float(product.price),
+                "quantity": item.quantity,
+                "image_url": product.image_url,
+                "subtotal": round(sub_total, 2)
+            })
 
 
 
-    return flask.render_template("cart.html",products = items_list,total=total)
+        return flask.render_template("cart.html",products = items_list,total=total)
+    except Exception as e:
+
+        app.logger.error(f"CART ERROR {str(e)}")
+        return flask.jsonify({"status":"failed","message":str(e)}),200 
+
+    # return flask.jsonify({"products":items_list,"total":total}),200
 
 
 @app.route('/api/place_order',methods=['POST'])
@@ -845,10 +852,10 @@ def get_products():
 
             # return jsonify({"products":products})
             # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products]}),200
+        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products],"pagination":pagination}),200
     except Exception as  e:
 
-        app.logger.error(f"DEKHO RE DEKHO AAYA ERROR  {str(e)} ")
+        app.logger.error(f"PRODUCTS FETCH  ERROR {str(e)} ")
 
     
 
