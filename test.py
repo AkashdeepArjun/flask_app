@@ -724,31 +724,35 @@ def logout():
 @limiter.limit("5 per minute")
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
-    existing_user_server = flask.session.get('user')
 
-    existing_user  = flask.g.user
+    try:
+        existing_user_server = flask.session.get('user')
 
-        
-    form = LoginForm(flask.request.form)
-  
-    if form.validate_on_submit:
-        username=form.usermail.data
-        userpassword = form.userpassword.data
+        existing_user  = flask.g.user
+
             
-        user =User.query.filter_by(email=username).first()
-        if user:
-            is_valid = check_password_hash(user.password,userpassword)
-            if is_valid:
-                flask.session['user'] = user.username
-                flask.session['isLoggedIn'] = True
-                # response= flask.make_response(flask.render_template("products.html",user=user),201)
-                response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
-                response.set_cookie('user',user.username,15*60)                     
-                return response
+        form = LoginForm(flask.request.form)
+    
+        if form.validate_on_submit:
+            username=form.usermail.data
+            userpassword = form.userpassword.data
+                
+            user =User.query.filter_by(email=username).first()
+            if user:
+                is_valid = check_password_hash(user.password,userpassword)
+                if is_valid:
+                    flask.session['user'] = user.username
+                    flask.session['isLoggedIn'] = True
+                    # response= flask.make_response(flask.render_template("products.html",user=user),201)
+                    response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
+                    response.set_cookie('user',user.username,15*60)                     
+                    return response
+                else:
+                    return f"Wrong Username or Password"
             else:
-                return f"Wrong Username or Password"
-        else:
-            return f"user not found",404
+                return f"user not found",404
+    except Exception as e:
+        app.logger.error(f"ERROR OCCURED {str(e)}")
             
 @app.route('/api/register',methods =['GET','POST'])
 def register_user():
