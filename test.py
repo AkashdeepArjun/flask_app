@@ -777,44 +777,47 @@ def login_user():
             
 @app.route('/api/register',methods =['GET','POST'])
 def register_user():
-    errors={}
-    form = RegisterationForm(CombinedMultiDict((flask.request.files,flask.request.form)))
-   
-    if form.validate_on_submit():
-        # file = request.files['file']
 
-        # if file.filename == '':
-        #     errors['file_upload'] = " file is empty"
-        #     return jsonify({"message":"register user failed","errors":errors}),500
-        
-        
-        profile_url = form.profile_picture.data
-        filename = secure_filename(profile_url.filename)
+    try:
+        errors={}
+        form = RegisterationForm(CombinedMultiDict((flask.request.files,flask.request.form)))
+    
+        if form.validate_on_submit():
+            # file = request.files['file']
 
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-        profile_url.save(file_path)
-
-        name= form.username.data.strip()
-        email = form.email.data.strip()
-        password = form.password.data
-        hashed_password = generate_password_hash(password=password)       
-        new_user = User(username=name,email=email,password=hashed_password,profile_url=filename)
-        db.session.add(new_user)
-        db.session.commit() 
-        # return flask.redirect(flask.url_for('get_products'))
-        return flask.jsonify({"status":"success","message":"user created successfully"}),201
+            # if file.filename == '':
+            #     errors['file_upload'] = " file is empty"
+            #     return jsonify({"message":"register user failed","errors":errors}),500
             
+            
+            profile_url = form.profile_picture.data
+            filename = secure_filename(profile_url.filename)
 
-    else:
-        print('FORM NOT VALIDATED')
-        clean_errors = {}
-        for field_name, error_messages in form.errors.items():
-            clean_errors[field_name] = error_messages
-        return flask.jsonify({"status":"failed","reason":{clean_errors}})
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-            # return f"form submitted successfully"
+            profile_url.save(file_path)
 
+            name= form.username.data.strip()
+            email = form.email.data.strip()
+            password = form.password.data
+            hashed_password = generate_password_hash(password=password)       
+            new_user = User(username=name,email=email,password=hashed_password,profile_url=filename)
+            db.session.add(new_user)
+            db.session.commit() 
+            # return flask.redirect(flask.url_for('get_products'))
+            return flask.jsonify({"status":"success","message":"user created successfully"}),201
+                
+
+        else:
+            print('FORM NOT VALIDATED')
+            clean_errors = {}
+            for field_name, error_messages in form.errors.items():
+                clean_errors[field_name] = error_messages
+            return flask.jsonify({"status":"failed","reason":{clean_errors}})
+
+                # return f"form submitted successfully"
+    except Exception as e:
+        app.logger.error(f"REGISTERATION ERROR: {str(e)} ")
 
 
 
