@@ -335,12 +335,12 @@ def login_required(f):
     return login_middleware
 
 
-@app.route('/tester')
-def test_route():
-    return f"Github workflow is working"
+# @app.route('/tester')
+# def test_route():
+#     return f"Github workflow is working"
 
 
-@app.route('/cart/add',methods=['POST'])
+@app.route('/api/cart/add',methods=['POST'])
 @login_required
 def add_to_cart():
     data = flask.request.get_json() or {}
@@ -400,7 +400,7 @@ def add_to_cart():
     }), 200
     
 
-@app.route('/cart',methods=['GET'])
+@app.route('/api/cart',methods=['GET'])
 @login_required
 def my_cart():
     user = flask.g.user
@@ -408,8 +408,8 @@ def my_cart():
     cart = user.cart 
 
     if not cart :
-        return flask.render_template("error.html",error="Cart is Empty")
-
+        # return flask.render_template("error.html",error="Cart is Empty")
+        return flask.jsonify({"status":"failed","message":"cart is empty"})
     cart_items = CartProduct.query.filter_by(cart_id=cart.id).all()
     items_list = []
 
@@ -440,7 +440,7 @@ def my_cart():
     return flask.render_template("cart.html",products = items_list,total=total)
 
 
-@app.route('/place_order',methods=['POST'])
+@app.route('/api/place_order',methods=['POST'])
 @login_required
 def place_order():
     try:
@@ -521,7 +521,7 @@ def place_order():
             return flask.jsonify({"message":"order failed","detail":str(e)})
     
 
-@app.route('/my_orders',methods = ['GET'])
+@app.route('/api/my_orders',methods = ['GET'])
 @login_required
 def my_orders():
     user = flask.g.user
@@ -535,7 +535,7 @@ def my_orders():
     return flask.render_template("my_orders.html",orders=orders)
 
 
-@app.route('/my_orders/<int:order_id>')
+@app.route('/api/my_orders/<int:order_id>')
 @login_required
 def order_details(order_id):
 
@@ -621,66 +621,64 @@ def order_details(order_id):
 
 
 
-@app.route('/inventory',methods=['GET','POST'])
+@app.route('/api/inventory',methods=['POST'])
 @admin_required
 def manage_products():
-    if flask.request.method == 'GET':
-        return flask.render_template("add_product.html",admin=flask.g.user)
+
+    product_id = flask.request.form.get('product_id')
+    product_name = flask.request.form.get("name")
+    product_slug = flask.request.form.get("slug")
+    product_brand = flask.request.form.get("brand")
+    product_price= flask.request.form.get("price")
+    product_category = flask.request.form.get("category")
+    json_info ={}
+    keys = flask.request.form.getlist("json_keys")  
+    values= flask.request.form.getlist("json_values")
+
+    for k,v in zip(keys,values):
+        json_info[k.strip()] = v.strip()
+
+    file = flask.request.files['file']
+
+    if file.filename =='':
+        return flask.jsonify({"error":"file is empty"}),500
     else:
-        product_id = flask.request.form.get('product_id')
-        product_name = flask.request.form.get("name")
-        product_slug = flask.request.form.get("slug")
-        product_brand = flask.request.form.get("brand")
-        product_price= flask.request.form.get("price")
-        product_category = flask.request.form.get("category")
-        json_info ={}
-        keys = flask.request.form.getlist("json_keys")  
-        values= flask.request.form.getlist("json_values")
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
 
-        for k,v in zip(keys,values):
-            json_info[k.strip()] = v.strip()
+        file.save(file_path)
 
-        file = flask.request.files['file']
-
-        if file.filename =='':
-            return flask.jsonify({"error":"file is empty"}),500
-        else:
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
-            file.save(file_path)
-
-            new_product = Product(product_id=product_id,
-                                  name=product_name,
-                                  category=product_category,
-                                  specs =json_info,
-                                  price=product_price,
-                                  slug=product_slug,
-                                  image_url=file.filename,
-                                  brand=product_brand,
-                                  description="",
-                                  created_at =datetime.datetime.now()
-                        
-                                  )
-            
-            # Product.query.add_entity(new_product)
-
-            db.session.add(new_product)
-
-
-            try:
-
-                db.session.commit()
-            except IntegrityError as e:
-
-                return   flask.jsonify({"error":"duplicate entry"}),500
-
-
-
-
-            res = flask.jsonify({"message":"product added"}),201
+        new_product = Product(product_id=product_id,
+                                name=product_name,
+                                category=product_category,
+                                specs =json_info,
+                                price=product_price,
+                                slug=product_slug,
+                                image_url=file.filename,
+                                brand=product_brand,
+                                description="",
+                                created_at =datetime.datetime.now()
+                    
+                                )
         
-            return res
-        return f"aya dekho kaun"
+        # Product.query.add_entity(new_product)
+
+        db.session.add(new_product)
+
+
+        try:
+
+            db.session.commit()
+        except IntegrityError as e:
+
+            return   flask.jsonify({"error":"duplicate entry"}),500
+
+
+
+
+        res = flask.jsonify({"message":"product added"}),201
+    
+        return res
+        # return f"aya dekho kaun"
     
 with app.app_context():
 
@@ -713,7 +711,7 @@ class LoginForm(FlaskForm):
     userpassword =PasswordField("Userpassword",validators=[DataRequired()])
     submit=SubmitField("Login")
 
-@app.route('/logout')
+@app.route('/api/logout')
 def logout():
     flask.session.clear()
     response = flask.make_response(flask.redirect(flask.url_for("login_user")),201)
@@ -722,80 +720,73 @@ def logout():
     return response
 
 
-@app.route('/login',methods =['GET','POST'])
+@app.route('/api/login',methods =['POST'])
 @limiter.limit("5 per minute")
 def login_user():
-    existing_user_client = flask.request.cookies.get('user') 
+    # existing_user_client = flask.request.cookies.get('user') 
     existing_user_server = flask.session.get('user')
-    if  existing_user_server:
 
-        user = User.query.filter_by(username=existing_user_server).first()
+    existing_user  = flask.g.user
 
-        response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
-
-        return response
         
     form = LoginForm(flask.request.form)
-    if flask.request.method == 'GET':
-        return flask.render_template("login.html",form=form)
-    else:
-        if form.validate_on_submit:
-            username=form.usermail.data
-            userpassword = form.userpassword.data
+  
+    if form.validate_on_submit:
+        username=form.usermail.data
+        userpassword = form.userpassword.data
             
-            user =User.query.filter_by(email=username).first()
-            if user:
-                is_valid = check_password_hash(user.password,userpassword)
-                if is_valid:
-                    flask.session['user'] = user.username
-                    flask.session['isLoggedIn'] = True
-                    # response= flask.make_response(flask.render_template("products.html",user=user),201)
-                    response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
-                    response.set_cookie('user',user.username,15*60)                     
-                    return response
-                else:
-                    return f"Wrong Username or Password"
+        user =User.query.filter_by(email=username).first()
+        if user:
+            is_valid = check_password_hash(user.password,userpassword)
+            if is_valid:
+                flask.session['user'] = user.username
+                flask.session['isLoggedIn'] = True
+                # response= flask.make_response(flask.render_template("products.html",user=user),201)
+                response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
+                response.set_cookie('user',user.username,15*60)                     
+                return response
             else:
-                return f"user not found",404
+                return f"Wrong Username or Password"
+        else:
+            return f"user not found",404
             
-@app.route('/register',methods =['GET','POST'])
+@app.route('/api/register',methods =['GET','POST'])
 def register_user():
     errors={}
     form = RegisterationForm(CombinedMultiDict((flask.request.files,flask.request.form)))
-    if flask.request.method == 'GET':
-        return flask.render_template("register.html",form=form)
+   
+    if form.validate_on_submit():
+        # file = request.files['file']
+
+        # if file.filename == '':
+        #     errors['file_upload'] = " file is empty"
+        #     return jsonify({"message":"register user failed","errors":errors}),500
+        
+        
+        profile_url = form.profile_picture.data
+        filename = secure_filename(profile_url.filename)
+
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+        profile_url.save(file_path)
+
+        name= form.username.data.strip()
+        email = form.email.data.strip()
+        password = form.password.data
+        hashed_password = generate_password_hash(password=password)       
+        new_user = User(username=name,email=email,password=hashed_password,profile_url=filename)
+        db.session.add(new_user)
+        db.session.commit() 
+        # return flask.redirect(flask.url_for('get_products'))
+        return flask.jsonify({"status":"success","message":"user created successfully"}),201
+            
+
     else:
-        if form.validate_on_submit():
-            # file = request.files['file']
-
-            # if file.filename == '':
-            #     errors['file_upload'] = " file is empty"
-            #     return jsonify({"message":"register user failed","errors":errors}),500
-            
-            
-            profile_url = form.profile_picture.data
-            filename = secure_filename(profile_url.filename)
-    
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            profile_url.save(file_path)
-
-            name= form.username.data.strip()
-            email = form.email.data.strip()
-            password = form.password.data
-            hashed_password = generate_password_hash(password=password)       
-            new_user = User(username=name,email=email,password=hashed_password,profile_url=filename)
-            db.session.add(new_user)
-            db.session.commit() 
-            return flask.redirect(flask.url_for('get_products'))
-            
-
-        else:
-            print('FORM NOT VALIDATED')
-            clean_errors = {}
-            for field_name, error_messages in form.errors.items():
-                clean_errors[field_name] = error_messages
-            return flask.jsonify({"status":"failed","reason":{clean_errors}})
+        print('FORM NOT VALIDATED')
+        clean_errors = {}
+        for field_name, error_messages in form.errors.items():
+            clean_errors[field_name] = error_messages
+        return flask.jsonify({"status":"failed","reason":{clean_errors}})
 
             # return f"form submitted successfully"
 
@@ -803,22 +794,22 @@ def register_user():
 
 
 
-@app.route('/products')
+@app.route('/api/products')
 def get_products():
     existing_user=flask.session['user']
-    # products = Product.query.all()
-    if existing_user:
-        user_obj = User.query.filter_by(username=existing_user).first()
-        query = db.select(Product).order_by(Product.product_id)
-        page = flask.request.args.get('page',1,type=int)
-        per_page= flask.request.args.get('per_page',10,type=int)
-        pagination = db.paginate(query,page=page,per_page=per_page)
-        products = pagination.items
+    session_exist = existing_user is not None
+    
+    user_obj = User.query.filter_by(username=existing_user).first()
+    query = db.select(Product).order_by(Product.product_id)
+    page = flask.request.args.get('page',1,type=int)
+    per_page= flask.request.args.get('per_page',10,type=int)
+    pagination = db.paginate(query,page=page,per_page=per_page)
+    products = pagination.items
 
         # return jsonify({"products":products})
-        return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-    else:
-        return flask.render_template("login.html")
+        # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
+    return flask.jsonify({"status":"success","products":products,"session exist":session_exist}),200
+   
     
 
 @app.route('/api/search-suggestions')
@@ -852,82 +843,89 @@ def get_suggestions():
 
 
 
-@app.route('/products/<int:id>')
+@app.route('/api/products/<int:id>')
 def product_detail(id):
 
     target_product = Product.query.get(id)
 
     if target_product:
-        return flask.render_template("product_detail.html",product=target_product)
+        return flask.jsonify({"status":"success","product":target_product})
+        # return flask.render_template("product_detail.html",product=target_product)
     else:
-        return flask.render_template("error.html",error = "could not find product")
-
-
-
-
-
-
-
-@app.route('/customers')
-def getCustomers():
-    users =User.query.all()
-    print('users ',users)
-    return flask.jsonify([user.to_dict() for user in users])
-
-@app.route('/customers/<id>')
-def customer_detail(id):
-
-    user = User.query.get(id)
-
-    if user:
-        return flask.jsonify(user.to_dict())
-    
-    else:
-        return flask.jsonify({"error":"could not find user "}),400
-
-
-
-@app.route('/upload',methods=['POST'])
-def upload_file():
-
-    if not 'file' in flask.request.files:
-        return flask.jsonify({'message':"not file found for upload",'error':400}),400
-
-    file = flask.request.files['file']
-
-    if file.filename == '':
-        return flask.jsonify({"error":"no selected file"}),400
-    
-    if file and is_file_format_valid(file.filename,ALLOWED_EXTENSIONS):
-
-        fname = secure_filename(file.filename)
-        fpath = os.path.join(app.config['UPLOAD_FOLDER'],fname)
-
-        file.save(fpath)
-
-        return flask.jsonify({"status":"success"}),201
-    
-    return flask.jsonify({"status":"failed"}),401   
-
-
-@app.route('/download/<filename>',methods=['GET'])
-def download_file(filename):
-    try:
-
-        safe_file_name = secure_filename(filename)
-
-        return flask.send_from_directory(app.config['UPLOAD_FOLDER'],safe_file_name,as_attachment=True)
-    
+        # return flask.render_template("error.html",error = "could not find product")
+        return flask.jsonify({"status":"failed","message":'product did not found'})
 
     
-    except FileNotFoundError as e:
-        print("errror occured ",e)
-        return flask.jsonify({"error":e}),404
 
 
-@app.route('/test_download')
-def test():
-    return flask.render_template("download.html")
+
+
+
+
+
+
+
+
+# @app.route('/customers')
+# def getCustomers():
+#     users =User.query.all()
+#     print('users ',users)
+#     return flask.jsonify([user.to_dict() for user in users])
+
+# @app.route('/customers/<id>')
+# def customer_detail(id):
+
+#     user = User.query.get(id)
+
+#     if user:
+#         return flask.jsonify(user.to_dict())
+    
+#     else:
+#         return flask.jsonify({"error":"could not find user "}),400
+
+
+
+# @app.route('/upload',methods=['POST'])
+# def upload_file():
+
+#     if not 'file' in flask.request.files:
+#         return flask.jsonify({'message':"not file found for upload",'error':400}),400
+
+#     file = flask.request.files['file']
+
+#     if file.filename == '':
+#         return flask.jsonify({"error":"no selected file"}),400
+    
+#     if file and is_file_format_valid(file.filename,ALLOWED_EXTENSIONS):
+
+#         fname = secure_filename(file.filename)
+#         fpath = os.path.join(app.config['UPLOAD_FOLDER'],fname)
+
+#         file.save(fpath)
+
+#         return flask.jsonify({"status":"success"}),201
+    
+#     return flask.jsonify({"status":"failed"}),401   
+
+
+# @app.route('/download/<filename>',methods=['GET'])
+# def download_file(filename):
+#     try:
+
+#         safe_file_name = secure_filename(filename)
+
+#         return flask.send_from_directory(app.config['UPLOAD_FOLDER'],safe_file_name,as_attachment=True)
+    
+
+    
+#     except FileNotFoundError as e:
+#         print("errror occured ",e)
+#         return flask.jsonify({"error":e}),404
+
+
+# @app.route('/test_download')
+# def test():
+#     return flask.render_template("download.html")
 
 
 
@@ -943,25 +941,25 @@ class RegisterForm(FlaskForm):
     userpass = PasswordField("Userpass",validators=[DataRequired(),Length(min=8)])
     submit =SubmitField('Submit')
 
-@app.route('/signing_up',methods=['GET','POST'])
-def signing_up():
-    form = RegisterForm()
-    errors =None
-    if form.validate_on_submit():
-        return f"registeration succesful"
+# @app.route('/signing_up',methods=['GET','POST'])
+# def signing_up():
+#     form = RegisterForm()
+#     errors =None
+#     if form.validate_on_submit():
+#         return f"registeration succesful"
     
-    if form.errors:
-        errors =form.errors
-        return flask.render_template("signing_up.html",form=form,errors=errors)
+#     if form.errors:
+#         errors =form.errors
+#         return flask.render_template("signing_up.html",form=form,errors=errors)
 
-    return flask.render_template("signing_up.html",form=form,errors=errors)
+#     return flask.render_template("signing_up.html",form=form,errors=errors)
 
 
 
-@app.get("/signup")
-def signup():
-    form = MyForm()
-    return flask.render_template("signup.html",form=form)
+# @app.get("/signup")
+# def signup():
+#     form = MyForm()
+#     return flask.render_template("signup.html",form=form)
 
 # @app.post('/signup')
 # def signup_post():
@@ -982,14 +980,14 @@ def home():
 #     arg_x = flask.request.args.get("x", "No parameter provided")
 #     return f"<h1>Value of x: {escape(arg_x)}</h1>"
 
-@app.route("/myroute/<name>")
-def myroute(name):
-    return f"<h1>Hello, variable name is  {escape(name)}!</h1>"
+# @app.route("/myroute/<name>")
+# def myroute(name):
+#     return f"<h1>Hello, variable name is  {escape(name)}!</h1>"
 
 
-@app.route("/myposts/<int:post_id>")
-def myposts(post_id):
-    return f"<h1>Post ID is {escape(post_id)}</h1>"
+# @app.route("/myposts/<int:post_id>")
+# def myposts(post_id):
+#     return f"<h1>Post ID is {escape(post_id)}</h1>"
 
 
 # @app.route("/mybuilds/<path:subpath>")
@@ -999,54 +997,54 @@ def myposts(post_id):
 
 
     
-@app.route('/welcome')
-def welcome():
-    return flask.render_template("welcome.html")
+# @app.route('/welcome')
+# def welcome():
+#     return flask.render_template("welcome.html")
 
 
 
-@app.route("/profile/<username>")
-def profile(username):
-    if username=="admin":
-        return flask.redirect(flask.url_for('home'))
+# @app.route("/profile/<username>")
+# def profile(username):
+#     if username=="admin":
+#         return flask.redirect(flask.url_for('home'))
     
 
 
-@app.route("/specso")
-def specs():
-   specs ={"RAM":"16GB","CPU":"Intel i7","Storage":"1TB SSD"}
-   return flask.render_template("specs.html",specs=specs)
+# @app.route("/specso")
+# def specs():
+#    specs ={"RAM":"16GB","CPU":"Intel i7","Storage":"1TB SSD"}
+#    return flask.render_template("specs.html",specs=specs)
 
-@app.route('/test_logic')
-def grade_calculator():
-    # Define a list of student dictionaries with name and score.
-    students = [
-        {'name': 'Alice', 'score': 85.234},
-        {'name': 'Bob', 'score': 59.567},
-        {'name': 'Charlie', 'score': 72.3},
-        {'name': 'David', 'score': 49.8},
-        {'name': 'Eve', 'score': 91.456}
-    ]
-    # Render the 'grades.html' template with the students data.
-    return flask.render_template('grades.html', students=students)
-
-
-@app.route("/my_projects")
-def my_projects():
-    global projects
-    res = flask.jsonify(projects)
-    return res
+# @app.route('/test_logic')
+# def grade_calculator():
+#     # Define a list of student dictionaries with name and score.
+#     students = [
+#         {'name': 'Alice', 'score': 85.234},
+#         {'name': 'Bob', 'score': 59.567},
+#         {'name': 'Charlie', 'score': 72.3},
+#         {'name': 'David', 'score': 49.8},
+#         {'name': 'Eve', 'score': 91.456}
+#     ]
+#     # Render the 'grades.html' template with the students data.
+#     return flask.render_template('grades.html', students=students)
 
 
+# @app.route("/my_projects")
+# def my_projects():
+#     global projects
+#     res = flask.jsonify(projects)
+#     return res
 
 
-@app.route('/samples')
-def projects():
-    projects = [
-        {"name": "Library Management System"},
-        {"name": "Personal Blog"},
-        {"name": "Data Structures Visualizer"}
-    ]
-    # res = jsonify(sample_projects)
 
-    return flask.render_template('samples.html',projects=projects)
+
+# @app.route('/samples')
+# def projects():
+#     projects = [
+#         {"name": "Library Management System"},
+#         {"name": "Personal Blog"},
+#         {"name": "Data Structures Visualizer"}
+#     ]
+#     # res = jsonify(sample_projects)
+
+#     return flask.render_template('samples.html',projects=projects)
