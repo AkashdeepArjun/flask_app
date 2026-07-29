@@ -58,6 +58,6 @@ class Product(db.Model):
             elif isinstance(val, (datetime, date)):
                 val = val.isoformat()
 
-                data[column.name] = val
+            data[column.name] = val
         return data
         
