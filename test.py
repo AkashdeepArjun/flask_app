@@ -190,9 +190,14 @@ def send_verification():
 
     email = data.get('email',None)
 
+    current_user = flask.g.user
+
 #check if valid mail is sent by user
-    if not email:
+    if not email or not current_user:
         return flask.jsonify({"error":"email required"}),400
+
+    if current_user.email != email:
+        return flask.jsonify({"error":"verify the email you logged in via  not oher email allows"}),400
 
     token = generate_verification_token(email=email)
 
