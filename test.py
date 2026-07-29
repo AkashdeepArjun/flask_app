@@ -571,7 +571,7 @@ def my_orders():
             return flask.jsonify({"status":"failed","message":"cart is empty"},400)
 
 
-        return  flask.jsonify({"status":"success","orders":orders}),200
+        return  flask.jsonify({"status":"success","orders":[o.to_dict() for o in orders]}),200
     except Exception as e :
 
         app.logger.error(f"FETCH ORDERS ERROR: {str(e)}")
