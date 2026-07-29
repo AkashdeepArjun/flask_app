@@ -62,6 +62,8 @@ message = "default message"
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
+#testiing flow
+
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
