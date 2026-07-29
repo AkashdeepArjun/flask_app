@@ -8,7 +8,7 @@ import os
 from wtforms import Form,StringField,SubmitField,PasswordField
 from database.InstanceManager import InstanceManager
 from sqlalchemy.exc import IntegrityError
-
+import traceback
 import datetime
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired,Email,Length
@@ -817,7 +817,7 @@ def register_user():
 
                 # return f"form submitted successfully"
     except Exception as e:
-        app.logger.error(f"REGISTERATION ERROR: {str(e)} ")
+        app.logger.error(f"REGISTERATION ERROR: {traceback.format_exc()} ")
 
 
 
