@@ -85,6 +85,7 @@ try:
     )
         file_handler.setLevel(logging.INFO)
         app.logger.setLevel(logging.INFO)
+        # app.logger.
         app.logger.addHandler(file_handler)
 
         app.logger.error('Flask application startup')
@@ -233,6 +234,23 @@ def send_verification():
 
     except Exception as e:
         return flask.jsonify({"error":str(e)}),400
+
+
+@app.route('/api/logs/<int:n>')
+def get_debug_logs(n):
+  try:
+    with open(log_file_path, 'r') as f:
+      lines = f.readlines()
+
+    # Reverse the array so the newest log entry is at the top
+    reversed_logs = lines[-1:-n-1:-1]
+
+    # Return top 50 newest lines
+    return flask.jsonify({'success': True, 'logs': reversed_logs[:50]}), 200
+  except Exception as e:
+    return flask.jsonify({'success': False, 'error': str(e)}), 500
+
+    
 
 
 
