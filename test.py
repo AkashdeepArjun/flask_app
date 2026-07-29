@@ -830,7 +830,7 @@ def register_user():
 
 
 
-@app.route('/api/products')
+@app.route('/api/products',methods=['GET'])
 @csrf.exempt
 def get_products():
     existing_user=flask.session['user']
