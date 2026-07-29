@@ -554,67 +554,83 @@ def place_order():
     except Exception as e:
 
             db.session.rollback()
+            app.logger.error(f"ORDER PLACE ISSUE:{str(e)}")
             return flask.jsonify({"message":"order failed","detail":str(e)})
     
 
 @app.route('/api/my_orders',methods = ['GET'])
 @login_required
 def my_orders():
-    user = flask.g.user
-    
-    orders = user.orders.order_by(Order.created_at.desc()).all()
-    
-    if not orders :
-        return flask.render_template("error.html",error="Cart is Empty") 
+    try:
+        user = flask.g.user
+        
+        orders = user.orders.order_by(Order.created_at.desc()).all()
+        
+        if not orders :
+            # return flask.render_template("error.html",error="Cart is Empty") 
+            return flask.jsonify({"status":"failed","message":"cart is empty"},400)
 
 
-    return flask.render_template("my_orders.html",orders=orders)
+        return  flask.jsonify({"status":"success","orders":orders}),200
+    except Exception as e :
+
+        app.logger.error(f"FETCH ORDERS ERROR: {str(e)}")
+        return flask.jsonify({"status":"failed","message":str(e)},400)
+
 
 
 @app.route('/api/my_orders/<int:order_id>')
 @login_required
 def order_details(order_id):
+    
+    try:
+        user = flask.g.user
 
-    user = flask.g.user
+        order_x = user.orders.filter_by(order_id=order_id).first()
 
-    order_x = user.orders.filter_by(order_id=order_id).first()
+        if not order_x:
+            return flask.jsonify({"error":"not such order found"}),400
 
-    if not order_x:
-        return flask.jsonify({"error":"not such order found"}),400
+        products_order_x = order_x.product_items
 
-    products_order_x = order_x.product_items
+        purchased_products =[]
 
-    purchased_products =[]
+        total_bill =Decimal('0.00')
 
-    total_bill =Decimal('0.00')
+        for item in products_order_x:
 
-    for item in products_order_x:
+            product = item.product
 
-        product = item.product
+            if not product:
+                continue 
 
-        if not product:
-            continue 
+            sub_total = Decimal (item.unit_price * item.quantity)
 
-        sub_total = Decimal (item.unit_price * item.quantity)
-
-        total_bill+=sub_total
-
-
-        purchased_products.append({
-            "product_id":product.product_id,
-            "product_name":product.name,
-            "quantity":item.quantity,
-            "price":item.unit_price,
-            "subtotal":sub_total
-
-        })
+            total_bill+=sub_total
 
 
-    if not purchased_products:
-        return flask.jsonify({"error":"not valid purchase found"}),400
+            purchased_products.append({
+                "product_id":product.product_id,
+                "product_name":product.name,
+                "quantity":item.quantity,
+                "price":item.unit_price,
+                "subtotal":sub_total
 
-    # return flask.jsonify({"data":purchased_products,"message":"orders fetch success"})
-    return flask.render_template("order_detail.html",order_items = purchased_products,total_bill=total_bill)
+            })
+
+
+        if not purchased_products:
+            return flask.jsonify({"error":"not valid purchase found"}),400
+
+        # return flask.jsonify({"data":purchased_products,"message":"orders fetch success"})
+        # return flask.render_template("order_detail.html",order_items = purchased_products,total_bill=total_bill)
+        return flask.jsonify({"status":"success","order_items":purchased_products,"total_bill":total_bill}),200
+
+    except Exception as e:
+
+            app.logger.error(f"ORDER DETAILS ISSUE {str(e)}")
+
+            return flask.jsonify({"status":"failed","message":str(e)}),400
 
 
 
