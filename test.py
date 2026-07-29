@@ -754,7 +754,7 @@ def login_user():
             else:
                 return f"user not found",404
     except Exception as e:
-        app.logger.error(f"ERROR OCCURED {str(e)}")
+        app.logger.info(f"ERROR OCCURED {str(e)}")
             
 @app.route('/api/register',methods =['GET','POST'])
 def register_user():
