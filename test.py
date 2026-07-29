@@ -813,7 +813,7 @@ def register_user():
             clean_errors = {}
             for field_name, error_messages in form.errors.items():
                 clean_errors[field_name] = error_messages
-            return flask.jsonify({"status":"failed","reason":{clean_errors}})
+            return flask.jsonify({"status":"failed","reason":clean_errors})
 
                 # return f"form submitted successfully"
     except Exception as e:
