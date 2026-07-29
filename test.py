@@ -1,4 +1,5 @@
 import flask
+from flask_wtf.csrf import CSRFProtect
 from decimal import Decimal
 from datetime import datetime
 from flask_migrate import Migrate
@@ -64,6 +65,7 @@ try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
     CORS(app=app)
+    csrf = CSRFProtect(app)
     
     limiter = Limiter(
             get_remote_address,
@@ -122,6 +124,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40my
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),'static','uploads')
+
+app.config['WTF_CSRF_ENABLED'] = False
 
 #mail settings 
 # app.config['MAIL_SERVER'] = 'mail.laziakeey.in' 
@@ -742,7 +746,8 @@ def logout():
 
 
 @app.route('/api/login',methods =['POST'])
-@limiter.limit("10 per minute")
+@limiter.limit("5 per minute")
+@csrf.exempt
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
 
@@ -776,6 +781,7 @@ def login_user():
         app.logger.info(f"ERROR OCCURED {str(e)}")
             
 @app.route('/api/register',methods =['GET','POST'])
+@csrf.exempt
 def register_user():
 
     try:
