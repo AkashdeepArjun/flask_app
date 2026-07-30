@@ -76,6 +76,53 @@ def get_client_ip():
       or "127.0.0.1"
   )
 
+from functools import wraps
+import time
+from flask import jsonify, request
+
+# Simple in-memory rate storage: { ip: [timestamp1, timestamp2, ...] }
+rate_store = {}
+
+
+def rate_limit(requests_per_minute=5):
+
+  def decorator(f):
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+      client_ip = (
+          request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+          or request.remote_addr
+      )
+      now = time.time()
+      window = 60  # 1 minute window
+
+      # Clean old requests for this IP
+      user_requests = rate_store.get(client_ip, [])
+      user_requests = [t for t in user_requests if now - t < window]
+
+      if len(user_requests) >= requests_per_minute:
+        return (
+            jsonify(
+                {"error": "hit limits", "message": "exceeded request limit"}
+            ),
+            429,
+        )
+
+      user_requests.append(now)
+      rate_store[client_ip] = user_requests
+      return f(*args, **kwargs)
+
+    return decorated_function
+
+  return decorator
+
+
+
+
+
+
+
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
@@ -93,6 +140,15 @@ try:
             enabled=True
     
         )
+
+
+
+
+
+
+
+
+    
     #see if  works
     basedir = os.path.abspath(os.path.dirname(__file__))
     log_file_path = os.path.join(basedir, 'flask_error.log')
@@ -800,7 +856,7 @@ def logout():
 
 @app.route('/api/login',methods =['POST'])
 @csrf.exempt
-@limiter.limit("5 per minute",override_defaults=True)
+@rate_limit(requests_per_minute=5)
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
 
