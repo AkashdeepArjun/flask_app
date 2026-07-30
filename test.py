@@ -67,6 +67,15 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 def get_ip():
     return flask.request.headers.get("X-Forwarded-For", flask.request.remote_addr)
 
+
+def get_client_ip():
+  # Extract true client IP from cPanel proxy headers
+  return (
+      flask.request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+      or flask.request.remote_addr
+      or "127.0.0.1"
+  )
+
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
@@ -75,8 +84,9 @@ try:
     csrf = CSRFProtect(app)
     
     limiter = Limiter(
-            get_remote_address,
+            # get_remote_address,
             # get_ip(),
+            get_client_ip(),
             app=app,
             default_limits=["200 per day","50 per hour"],
             storage_uri="memory://",
