@@ -85,8 +85,8 @@ try:
     
     limiter = Limiter(
             # get_remote_address,
-            # get_ip(),
-            get_client_ip,
+            get_ip,
+            # get_client_ip,
             app=app,
             default_limits=["200 per day","50 per hour"],
             storage_uri="memory://",
