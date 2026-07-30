@@ -136,6 +136,8 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__fil
 
 app.config['WTF_CSRF_ENABLED'] = False
 
+app.config["RATELIMIT_ENABLED"] = True
+
 #mail settings 
 # app.config['MAIL_SERVER'] = 'mail.laziakeey.in' 
 app.config['MAIL_SERVER'] = 'sg2plzcpnl508264.prod.sin2.secureserver.net'   # Server host from cPanel
