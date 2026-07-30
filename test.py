@@ -75,7 +75,7 @@ try:
             get_remote_address,
             app=app,
             default_limits=["200 per day","50 per hour"],
-            storage_uri="redis://localhost:6379",
+            storage_uri="memory://",
             enabled=True
     
         )
