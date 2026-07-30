@@ -1,7 +1,7 @@
 import flask
 from flask_wtf.csrf import CSRFProtect
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from flask_migrate import Migrate
 from markupsafe import escape
 from pack.mymod import linear_search
@@ -75,6 +75,47 @@ def get_client_ip():
       or flask.request.remote_addr
       or "127.0.0.1"
   )
+
+
+def db_rate_limit(max_requests:int=5,window_in_seconds:int=60):
+
+    def decorator(f):
+
+        @wraps(f)
+        def wrapper(*args,**kwargs):
+            client_ip = get_client_ip()
+            endpoint = request.path
+            now = datetime.now(timezone.utc)
+            cutoff = now - timedelta(seconds=window_in_seconds)
+
+            recent_count = db.session.scalar(
+            db.select(db.func.count(RateLimiting.id)).where(
+              RateLimiting.ip == client_ip,
+              RateLimiting.endpoint == endpoint,
+              RateLimiting.timestamp >= cutoff,
+            )
+            ) or 0
+
+            if recent_count >= max_requests:
+                return (
+                    jsonify({
+                "error": "hit limits",
+                "message": f"Too many requests. Limit is {max_requests} per {window_in_seconds} seconds.",
+                    }),
+                        429,
+                )
+
+            new_log = RateLimiting(ip=client_ip, endpoint=endpoint, timestamp=now)
+            db.session.add(new_log)
+            db.session.commit()
+
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 
 from functools import wraps
 import time
@@ -873,7 +914,7 @@ def debug_ip():
 
 @app.route('/api/login',methods =['POST'])
 @csrf.exempt
-@rate_limit(requests_per_minute=5)
+@db_rate_limit(max_requests=5,window_in_seconds=60)
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
 
