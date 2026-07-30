@@ -64,6 +64,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
 #testiing flow
 
+def get_ip():
+    return flask.request.headers.get("X-Forwarded-For", flask.request.remote_addr)
+
 try:
     
     app = InstanceManager.get_instance(flask.Flask,__name__)
@@ -72,7 +75,8 @@ try:
     csrf = CSRFProtect(app)
     
     limiter = Limiter(
-            get_remote_address,
+            # get_remote_address,
+            get_ip(),
             app=app,
             default_limits=["200 per day","50 per hour"],
             storage_uri="memory://",
