@@ -1027,7 +1027,14 @@ def get_products():
 
             # return jsonify({"products":products})
             # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products],"pagination":pagination}),200
+        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products],"pagination": {
+              "page": pagination.page,
+              "per_page": pagination.per_page,
+              "total_items": pagination.total,
+              "total_pages": pagination.pages,
+              "has_next": pagination.has_next,
+              "has_prev": pagination.has_prev,
+          }}),200
     except Exception as  e:
 
         app.logger.error(f"PRODUCTS FETCH  ERROR {str(e)} ")
