@@ -70,11 +70,17 @@ def get_ip():
 
 def get_client_ip():
   # Extract true client IP from cPanel proxy headers
-  return (
-      flask.request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
-      or flask.request.remote_addr
-      or "127.0.0.1"
-  )
+
+  try:
+    return (
+        flask.request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        or flask.request.remote_addr
+        or "127.0.0.1"
+    )
+  except Exception as e:
+      app.logger.warning(f"ip error {str(e)}")
+      
+      
 
 
 def db_rate_limit(max_requests:int=5,window_in_seconds:int=60):
