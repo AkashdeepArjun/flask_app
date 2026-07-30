@@ -79,7 +79,7 @@ def get_client_ip():
     )
   except Exception as e:
       app.logger.warning(f"ip error {str(e)}")
-      
+
       
 
 
@@ -89,31 +89,43 @@ def db_rate_limit(max_requests:int=5,window_in_seconds:int=60):
 
         @wraps(f)
         def wrapper(*args,**kwargs):
-            client_ip = get_client_ip()
-            endpoint = request.path
-            now = datetime.now(timezone.utc)
-            cutoff = now - timedelta(seconds=window_in_seconds)
+            try:
+                client_ip = get_client_ip()
+                endpoint = request.path
+                now = datetime.now(timezone.utc)
+                cutoff = now - timedelta(seconds=window_in_seconds)
 
-            recent_count = db.session.scalar(
-            db.select(db.func.count(RateLimiting.id)).where(
-              RateLimiting.ip == client_ip,
-              RateLimiting.endpoint == endpoint,
-              RateLimiting.timestamp >= cutoff,
-            )
-            ) or 0
+                recent_count = db.session.scalar(
+                db.select(db.func.count(RateLimiting.id)).where(
+                RateLimiting.ip == client_ip,
+                RateLimiting.endpoint == endpoint,
+                RateLimiting.timestamp >= cutoff,
+                )
+                ) or 0
 
-            if recent_count >= max_requests:
+                if recent_count >= max_requests:
+                    return (
+                        jsonify({
+                    "error": "hit limits",
+                    "message": f"Too many requests. Limit is {max_requests} per {window_in_seconds} seconds.",
+                        }),
+                            429,
+                    )
+
+                new_log = RateLimiting(ip=client_ip, endpoint=endpoint, timestamp=now)
+                db.session.add(new_log)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                app.logger.warning(f"RATE LIMIT ISSUE {str(e)}")
                 return (
                     jsonify({
-                "error": "hit limits",
-                "message": f"Too many requests. Limit is {max_requests} per {window_in_seconds} seconds.",
+                        'error': 'RateLimiterError',
+                        'details': str(e),
+                        'type': type(e).__name__,
                     }),
-                        429,
-                )
-
-            new_log = RateLimiting(ip=client_ip, endpoint=endpoint, timestamp=now)
-            db.session.add(new_log)
-            db.session.commit()
+                    500,
+                  ) 
 
             return f(*args, **kwargs)
 
