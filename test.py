@@ -854,6 +854,17 @@ def logout():
     return response
 
 
+@app.route('/api/debug-ip')
+def debug_ip():
+  return jsonify({
+      'remote_addr': request.remote_addr,
+      'x_forwarded_for': request.headers.get('X-Forwarded-For'),
+      'client_ip_header': request.headers.get('CF-Connecting-IP'),
+      'all_headers': dict(request.headers),
+  })
+
+
+
 @app.route('/api/login',methods =['POST'])
 @csrf.exempt
 @rate_limit(requests_per_minute=5)
