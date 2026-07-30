@@ -148,7 +148,7 @@ try:
 
 
 
-    
+    # 
     #see if  works
     basedir = os.path.abspath(os.path.dirname(__file__))
     log_file_path = os.path.join(basedir, 'flask_error.log')
@@ -825,10 +825,16 @@ with app.app_context():
     
     from data.CartProduct import CartProduct
 
+    from data.RateLimiting import RateLimiting
+
     # import data.User, data.Product,data.Cart, data.Order, data.OrderProduct, data.CartProduct
 
 
     db.create_all()
+
+
+    RateLimiting.__table__.create(bind=db.engine, checkfirst=True)
+    print("Rate limit table initialized successfully!") 
 
 
 class  RegisterationForm(FlaskForm):
