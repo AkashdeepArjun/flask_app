@@ -92,7 +92,7 @@ def db_rate_limit(max_requests:int=5,window_in_seconds:int=60):
             try:
                 client_ip = get_client_ip()
                 endpoint = request.path
-                now = datetime.now(timezone.utc)
+                now = datetime.datetime.now(timezone.utc)
                 cutoff = now - timedelta(seconds=window_in_seconds)
 
                 recent_count = db.session.scalar(
