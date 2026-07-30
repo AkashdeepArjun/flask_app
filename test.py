@@ -799,7 +799,7 @@ def logout():
 
 
 @app.route('/api/login',methods =['POST'])
-# @csrf.exempt
+@csrf.exempt
 @limiter.limit("5 per minute",override_defaults=True)
 def login_user():
     # existing_user_client = flask.request.cookies.get('user') 
