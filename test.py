@@ -1077,16 +1077,18 @@ def get_suggestions():
 
 @app.route('/api/products/<int:id>')
 def product_detail(id):
+    try:
+        target_product = Product.query.get(id)
 
-    target_product = Product.query.get(id)
-
-    if target_product:
-        return flask.jsonify({"status":"success","product":target_product})
+        if target_product:
+           return flask.jsonify({"status":"success","product":target_product})
         # return flask.render_template("product_detail.html",product=target_product)
-    else:
+        else:
         # return flask.render_template("error.html",error = "could not find product")
-        return flask.jsonify({"status":"failed","message":'product did not found'})
+          return flask.jsonify({"status":"failed","message":'product did not found'})
 
+    except Exception as e:
+            app.logger.error(f"PRODUCT DETAIL ERROR {str(e)}")  
     
 
 
