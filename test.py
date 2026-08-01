@@ -187,9 +187,9 @@ try:
     app = InstanceManager.get_instance(flask.Flask,__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
     #settings for server  
-    # CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "https://www.laziakeey.in"]}})
+    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "https://www.laziakeey.in"]}})
     # CORS(app=app)
-    CORS(app, resources={r"/api/*": {"origins": "*"}}) 
+    # CORS(app, resources={r"/api/*": {"origins": "*"}}) 
     csrf = CSRFProtect(app)
     
     limiter = Limiter(
