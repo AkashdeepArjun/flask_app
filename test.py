@@ -1081,7 +1081,7 @@ def product_detail(id):
         target_product = Product.query.get(id)
 
         if target_product:
-           return flask.jsonify({"status":"success","product":target_product})
+           return flask.jsonify({"status":"success","product":target_product.to_dict()}),200
         # return flask.render_template("product_detail.html",product=target_product)
         else:
         # return flask.render_template("error.html",error = "could not find product")
