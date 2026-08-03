@@ -479,7 +479,7 @@ def load_current_user():
         flask.g.user = User.query.filter_by(username=name).first()
         # flask.g.user.rol
 
-"
+
 
 def admin_required(f):
     @wraps(f)
