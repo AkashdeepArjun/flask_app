@@ -479,13 +479,7 @@ def load_current_user():
         flask.g.user = User.query.filter_by(username=name).first()
         # flask.g.user.rol
 
-@app.after_request
-def clear_cookies(response):
-
-    if hasattr(g,'clear_my_cookie'):
-        response.delete_cookie('user')
-    return response
-
+"
 
 def admin_required(f):
     @wraps(f)
@@ -923,11 +917,9 @@ class LoginForm(FlaskForm):
 @app.route('/api/logout')
 def logout():
     flask.session.clear()
-    flask.g.clear_my_cookie=True
-    # """ response = flask.make_response(flask.redirect(flask.url_for("login_user")),201) """
-    # Removes the cookie by forcing immediate expiration
-    # response.set_cookie('user', '', max_age=0) 
-    return flask.jsonify({"status":"ok","message":"logout succesfully"})
+    response= flask.jsonify({"status":"ok","message":"logout succesfully"})
+    response.delete_cookie('user')
+    return response
 
 
 @app.route('/api/debug-ip')
