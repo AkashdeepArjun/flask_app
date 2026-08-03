@@ -960,7 +960,9 @@ def login_user():
                     # response= flask.make_response(flask.render_template("products.html",user=user),201)
                     # response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
                     # response.set_cookie('user',user.username,15*60)                     
-                    return flask.jsonify({"status":"success","message":"login success"}),200
+                    return flask.jsonify({"status":"success","message":"login success","user":{
+                    "usermail":username,"profile_url":user.profile_url
+                    }}),200
                 else:
                     return flask.jsonify({"status":"failed","message":"login failed"}),400
                    
@@ -1001,7 +1003,7 @@ def register_user():
             db.session.add(new_user)
             db.session.commit() 
             # return flask.redirect(flask.url_for('get_products'))
-            return flask.jsonify({"status":"success","message":"user created successfully"}),201
+            return flask.jsonify({"status":"success","message":"user created successfully", "user":{"usermail":email,"profile_url":profile_url}       }),201
                 
 
         else:
