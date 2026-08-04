@@ -952,7 +952,7 @@ def login_user():
             username=form.usermail.data
             userpassword = form.userpassword.data
 
-            app.logger.log(f"request from user {username} recieved")
+            app.logger.info(f"request from user {username} recieved")
                 
             user =User.query.filter_by(email=username).first()
             if user:
