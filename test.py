@@ -986,9 +986,12 @@ def login_user():
     except Exception as e:
         app.logger.info(f"ERROR OCCURED {str(e)}")
             
-@app.route('/api/register',methods =['GET','POST'])
+@app.route('/api/register',methods =['OPTIONS','POST'])
 @csrf.exempt
 def register_user():
+
+    if flask.request.method == 'OPTIONS':
+        return '', 200
 
     try:
         errors={}
