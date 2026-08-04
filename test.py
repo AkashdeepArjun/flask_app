@@ -961,7 +961,7 @@ def login_user():
                     # response= flask.make_response(flask.render_template("products.html",user=user),201)
                     # response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
                     # response.set_cookie('user',user.username,15*60)                     
-                    return flask.jsonify({"status":"success","message":"login success","user":{
+                    return flask.jsonify({"status":"ok","message":"login success","user":{
                     "usermail":username,"profile_url":user.profile_url,
                     "is_verified":bool(user.email_verified_at)
                     }}),200
