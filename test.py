@@ -955,6 +955,9 @@ def login_user():
 
         existing_user  = flask.g.user
 
+        app.logger.info(f"CONTENT TYPE {request.content_type}")
+        app.logger.info(f"RAW FORM {request.form}")
+        app.logger.info(f"JSON {request.get_json(silent=True)}")
             
         form = LoginForm(flask.request.form,meta={'csrf': False})
     
@@ -995,6 +998,12 @@ def register_user():
 
     try:
         errors={}
+
+
+        
+
+
+
         form = RegisterationForm(CombinedMultiDict((flask.request.files,flask.request.form)))
     
         if form.validate_on_submit():
