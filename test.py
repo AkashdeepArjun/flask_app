@@ -1021,7 +1021,7 @@ def register_user():
             db.session.add(new_user)
             db.session.commit() 
             # return flask.redirect(flask.url_for('get_products'))
-            return flask.jsonify({"status":"success","message":"user created successfully", "user":{"usermail":email,"profile_url":profile_url} }),201
+            return flask.jsonify({"status":"success","message":"user created successfully", "user":{"usermail":email,"profile_url":profile_url.filename} }),201
                 
 
         else:
