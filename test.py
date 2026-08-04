@@ -956,7 +956,7 @@ def login_user():
         existing_user  = flask.g.user
 
             
-        form = LoginForm(flask.request.form)
+        form = LoginForm(flask.request.form,meta={'csrf': False})
     
         if form.validate_on_submit:
             username=form.usermail.data
