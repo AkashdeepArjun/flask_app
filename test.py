@@ -1006,6 +1006,7 @@ def register_user():
             
             
             profile_url = form.profile_picture.data
+            app.logger.info(f" tpye of  profile url is {type(profile_url)}")
             filename = secure_filename(profile_url.filename)
 
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
