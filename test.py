@@ -255,11 +255,12 @@ app.config.update(
     SECRET_KEY='akeeydemoproject007'
 )
 
-
+# DATABASE SETTINGS 
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+mysqlconnector://akash:akash%40mysql@localhost/dev"
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] =False
 
+# UPLOAD FOLDER_CONFIG
 app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__file__)),'static','uploads')
 
 app.config['WTF_CSRF_ENABLED'] = False
@@ -961,7 +962,8 @@ def login_user():
                     # response = flask.make_response(flask.redirect(flask.url_for('get_products')), 302)
                     # response.set_cookie('user',user.username,15*60)                     
                     return flask.jsonify({"status":"success","message":"login success","user":{
-                    "usermail":username,"profile_url":user.profile_url
+                    "usermail":username,"profile_url":user.profile_url,
+                    "is_verified":bool(user.email_verified_at)
                     }}),200
                 else:
                     return flask.jsonify({"status":"failed","message":"login failed"}),400
