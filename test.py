@@ -951,6 +951,8 @@ def login_user():
         if form.validate_on_submit:
             username=form.usermail.data
             userpassword = form.userpassword.data
+
+            app.logger.log(f"request from user {username} recieved")
                 
             user =User.query.filter_by(email=username).first()
             if user:
