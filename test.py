@@ -624,7 +624,7 @@ def my_cart():
 
         # JSON.DATA ={PRODUCTS,TOTAL}
         # return flask.render_template("cart.html",products = items_list,total=total)
-        return flask.jsonify({"products":items_list,"total":total}),200
+        return flask.jsonify({"status":"ok", "products":items_list,"total":total}),200
     except Exception as e:
 
         app.logger.error(f"CART ERROR {str(e)}")
