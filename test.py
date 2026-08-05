@@ -574,6 +574,7 @@ def add_to_cart():
 
         
         return flask.jsonify({
+            "status":"ok",
             "message": "Item added to cart successfully",
             "cart_item": {
                 "product_id": cart_item.product_id,
@@ -621,13 +622,13 @@ def my_cart():
             })
 
 
-
+        # JSON.DATA ={PRODUCTS,TOTAL}
         # return flask.render_template("cart.html",products = items_list,total=total)
         return flask.jsonify({"products":items_list,"total":total}),200
     except Exception as e:
 
         app.logger.error(f"CART ERROR {str(e)}")
-        return flask.jsonify({"status":"failed","message":str(e)}),200 
+        return flask.jsonify({"status":"failed","message":str(e)}),400
 
     # return flask.jsonify({"products":items_list,"total":total}),200
 
