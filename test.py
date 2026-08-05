@@ -527,6 +527,8 @@ def add_to_cart():
     try:
         data = flask.request.get_json() or {}
 
+        app.logger.info(f"CART ITEM RECIEVED {data}")
+
         product_id = data.get("product_id")
 
         quantity = data.get("quantity",1)
