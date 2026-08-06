@@ -335,7 +335,7 @@ def send_mail_logic(reciever,subject,body,body_html=None):
 
 
 
-@app.route('/api/send_verification',methods=['POST'])
+@app.route('/send_verification',methods=['POST'])
 def send_verification():
 
     data = flask.request.get_json() or {}
@@ -416,7 +416,7 @@ def get_debug_logs(n):
 
 
 
-@app.route('/api/verify_email/<token>',methods=['GET'])
+@app.route('/verify_email/<token>',methods=['GET'])
 def verify_email(token):
 
  
@@ -533,7 +533,7 @@ def login_required(f):
 #     return f"Github workflow is working"
 
 
-@app.route('/api/cart/add',methods=['POST'])
+@app.route('/cart/add',methods=['POST'])
 @login_required
 def add_to_cart():
     try:
@@ -649,7 +649,7 @@ def my_cart():
     # return flask.jsonify({"products":items_list,"total":total}),200
 
 
-@app.route('/api/place_order',methods=['POST'])
+@app.route('/place_order',methods=['POST'])
 @login_required
 def place_order():
     try:
@@ -731,7 +731,7 @@ def place_order():
             return flask.jsonify({"message":"order failed","detail":str(e)})
     
 
-@app.route('/api/my_orders',methods = ['GET'])
+@app.route('/my_orders',methods = ['GET'])
 @login_required
 def my_orders():
     try:
@@ -752,7 +752,7 @@ def my_orders():
 
 
 
-@app.route('/api/my_orders/<int:order_id>')
+@app.route('/my_orders/<int:order_id>')
 @login_required
 def order_details(order_id):
     
@@ -846,7 +846,7 @@ def order_details(order_id):
 
 
 
-@app.route('/api/inventory',methods=['POST'])
+@app.route('/inventory',methods=['POST'])
 @admin_required
 def manage_products():
 
@@ -942,7 +942,7 @@ class LoginForm(FlaskForm):
     userpassword =PasswordField("Userpassword",validators=[DataRequired()])
     submit=SubmitField("Login")
 
-@app.route('/api/logout')
+@app.route('/logout')
 def logout():
     flask.session.clear()
     response= flask.jsonify({"status":"ok","message":"logout succesfully"})
@@ -950,7 +950,7 @@ def logout():
     return response
 
 
-@app.route('/api/debug-ip')
+@app.route('/debug-ip')
 def debug_ip():
   return jsonify({
       'remote_addr': request.remote_addr,
@@ -961,7 +961,7 @@ def debug_ip():
 
 
 
-@app.route('/api/login',methods =['POST'])
+@app.route('/login',methods =['POST'])
 @csrf.exempt
 @db_rate_limit(max_requests=5,window_in_seconds=60)
 def login_user():
@@ -1007,7 +1007,7 @@ def login_user():
     except Exception as e:
         app.logger.info(f"ERROR OCCURED {str(e)}")
             
-@app.route('/api/register',methods =['OPTIONS','POST'])
+@app.route('/register',methods =['OPTIONS','POST'])
 @csrf.exempt
 def register_user():
 
@@ -1069,7 +1069,7 @@ def register_user():
 
 
 
-@app.route('/api/products',methods=['GET'])
+@app.route('/products',methods=['GET'])
 @csrf.exempt
 def get_products():
     try:
@@ -1095,7 +1095,7 @@ def get_products():
 
     
 
-@app.route('/api/search-suggestions')
+@app.route('/search-suggestions')
 def get_suggestions():
 
     query_text = flask.request.args.get('q','',type=str)
@@ -1126,7 +1126,7 @@ def get_suggestions():
 
 
 
-@app.route('/api/products/<int:id>')
+@app.route('/products/<int:id>')
 def product_detail(id):
     try:
         target_product = Product.query.get(id)
