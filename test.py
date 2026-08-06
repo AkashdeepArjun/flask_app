@@ -527,11 +527,14 @@ def add_to_cart():
     try:
         data = flask.request.get_json() or {}
 
+
         app.logger.info(f"CART ITEM RECIEVED {data}")
 
         product_id = data.get("product_id")
 
         quantity = data.get("quantity",1)
+
+        app.logger.info(f"cart add request recieved {product_id} and {quantity}")
 
         #  check for invalid product 
         if not product_id or not isinstance(quantity,int) or quantity <1:
