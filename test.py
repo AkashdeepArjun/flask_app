@@ -397,7 +397,7 @@ def send_verification():
         return flask.jsonify({"error":str(e)}),400
 
 
-@app.route('/logs/<int:n>')
+@app.route('/api/logs/<int:n>')
 def get_debug_logs(n):
   try:
     with open(log_file_path, 'r') as f:
