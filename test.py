@@ -187,7 +187,19 @@ try:
     app = InstanceManager.get_instance(flask.Flask,__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
     #settings for server  
-    CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173", "https://www.laziakeey.in"]}})
+    # CORS(app, resources={r"/api/*":{"origins": ["http://localhost:5173", "https://www.laziakeey.in"]}})
+
+    CORS(
+     app,
+            resources={
+            r"/api/*": {
+                "origins": ["http://localhost:5173", "https://www.laziakeey.in"],
+                "supports_credentials": True  # <--- CRITICAL FOR SESSIONS/COOKIES!
+            }
+        }
+    )
+
+
     # CORS(app=app)
     # CORS(app, resources={r"/api/*": {"origins": "*"}}) 
     csrf = CSRFProtect(app)
@@ -526,7 +538,6 @@ def login_required(f):
 def add_to_cart():
     try:
         data = flask.request.get_json() or {}
-
 
         app.logger.info(f"CART ITEM RECIEVED {data}")
 
@@ -977,6 +988,7 @@ def login_user():
             if user:
                 is_valid = check_password_hash(user.password,userpassword)
                 if is_valid:
+
                     flask.session['user'] = user.username
                     flask.session['isLoggedIn'] = True
                     # response= flask.make_response(flask.render_template("products.html",user=user),201)
