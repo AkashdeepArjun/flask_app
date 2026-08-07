@@ -617,6 +617,8 @@ def my_cart():
 
         total = 0
 
+        #ulala
+
         for item in cart_items:
 
             product = item.product
