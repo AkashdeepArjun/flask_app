@@ -222,6 +222,8 @@ try:
 
 
 
+
+
     # 
     #see if  works
     basedir = os.path.abspath(os.path.dirname(__file__))
@@ -332,6 +334,10 @@ def send_mail_logic(reciever,subject,body,body_html=None):
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_USER, [reciever], msg.as_string())
 
+
+@app.route('/test_api')
+def test():
+    return flask.jsonify({"status":"okay","message":"rocks"}) 
 
 
 
