@@ -601,7 +601,7 @@ def add_to_cart():
         app.logger.error(f"ADD TO CART ERROR :{str(e)}")
         return flask.jsonify({"error":"database issue","details":str(e)})
 
-@app.route('/api/cart',methods=['GET'])
+@app.route('/cart',methods=['GET'])
 @login_required
 def my_cart():
     try:
