@@ -43,6 +43,5 @@ jobs:
           port: 21
           protocol: ftps
           security: ftps
-          passive: true
           local-dir: ./tmp/
           server-dir: ./flask_app/tmp/
