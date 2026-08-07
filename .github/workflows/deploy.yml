@@ -2,27 +2,20 @@ name: Deploy Flask to flask_app
 
 on:
   push:
-    branches:
-      - main  # or master
+    branches: [ api ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      # --- 1. SYNC FLASK CODE ---
-      - name: Deploy Flask Backend to flask_app
+      - name: Sync to flask_app
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftps                      # Forces FTPS/Explicit TLS (required by GoDaddy)
-          security: ftps
+          password: ${{ secrets.FTP_USERPASSWORD }}
           local-dir: ./
           server-dir: ./flask_app/
           exclude: |
@@ -31,17 +24,12 @@ jobs:
             **/venv/**
             **/__pycache__/**
             **/.env
-            **/tmp/**
 
-      # --- 2. RESTART PASSENGER ENGINE ---
-      - name: Trigger Passenger Reload
+      - name: Restart Passenger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftps
-          security: ftps
+          password: ${{ secrets.FTP_USERPASSWORD }}
           local-dir: ./tmp/
           server-dir: ./flask_app/tmp/
