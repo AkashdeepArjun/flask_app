@@ -337,7 +337,7 @@ def send_mail_logic(reciever,subject,body,body_html=None):
 
 @app.route('/test_api')
 def test():
-    return flask.jsonify({"status":"okay","message":"rocks oh yea"}) 
+    return flask.jsonify({"status":"okay","message":"rocks oh yea lolwa"}) 
 
 
 
