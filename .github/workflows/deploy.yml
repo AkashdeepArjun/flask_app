@@ -29,6 +29,11 @@ jobs:
             **/__pycache__/**
             **/.env
 
+      - name: Create local tmp folder
+        run: |
+          mkdir -p tmp
+          touch tmp/restart.txt
+        
       - name: Restart Passenger
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
