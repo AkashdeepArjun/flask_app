@@ -658,7 +658,7 @@ def my_cart():
 
 
 
-@app.route('/cart/delete')
+@app.route('/cart/delete',methods=['POST'])
 def delete_cart_item():
 
     
@@ -680,7 +680,7 @@ def delete_cart_item():
 
         db.session.commit()
 
-        
+
 
 
     except Exception as e:
