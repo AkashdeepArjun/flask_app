@@ -648,13 +648,49 @@ def my_cart():
 
         # JSON.DATA ={PRODUCTS,TOTAL}
         # return flask.render_template("cart.html",products = items_list,total=total)
-        return flask.jsonify({"status":"ok", "products":items_list,"total":total}),200
+        return flask.jsonify({"status":"ok", "products":items_list,"total":total,"cart_id":cart.id}),200
     except Exception as e:
 
         app.logger.error(f"CART ERROR {str(e)}")
         return flask.jsonify({"status":"failed","message":str(e)}),400
 
     # return flask.jsonify({"products":items_list,"total":total}),200
+
+
+
+@app.route('/cart/delete')
+def delete_cart_item():
+
+    
+    try:
+        cart_id = request.args.get('cart_id',None)
+
+        product_id = request.args.get('product_id',None)
+
+        if not cart_id or not product_id:
+            return flask.jsonify({"status":"failed","reason":"either cart is invalid or product is invalid"}),404
+
+        target_product  = CartProduct.filter_by(cart_id=cart_id,product_id =product_id).first()
+
+        if not target_product:
+
+           return flask.jsonify({"status":"failed","reason":"not such product found in cart "}),404
+
+        db.session.delete(target_product)
+
+        db.session.commit()
+
+        
+
+
+    except Exception as e:
+
+        return flask.jsonify({"status":"failed","reason":str(e)})
+
+    
+
+
+
 
 
 @app.route('/place_order',methods=['POST'])
@@ -730,14 +766,20 @@ def place_order():
         return flask.jsonify({
                 "message": "Order placed successfully!",
                 "order_id": new_order.order_id,
-                "total_amount": float(grand_total)
+                "total_amount": float(grand_total),
             }), 201
     except Exception as e:
 
             db.session.rollback()
             app.logger.error(f"ORDER PLACE ISSUE:{str(e)}")
             return flask.jsonify({"message":"order failed","detail":str(e)})
-    
+
+
+ 
+
+
+
+       
 
 @app.route('/my_orders',methods = ['GET'])
 @login_required
