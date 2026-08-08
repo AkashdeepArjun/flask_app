@@ -680,6 +680,8 @@ def delete_cart_item():
 
         db.session.commit()
 
+        return flask.jsonify({"status":"ok","message":"item deleted successfully"}),201
+
 
 
 
