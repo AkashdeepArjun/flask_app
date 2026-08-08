@@ -670,7 +670,7 @@ def delete_cart_item():
         if not cart_id or not product_id:
             return flask.jsonify({"status":"failed","reason":"either cart is invalid or product is invalid"}),404
 
-        target_product  = CartProduct.filter_by(cart_id=cart_id,product_id =product_id).first()
+        target_product  = CartProduct.query.filter_by(cart_id=cart_id,product_id =product_id).first()
 
         if not target_product:
 
