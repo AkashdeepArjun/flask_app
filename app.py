@@ -582,15 +582,11 @@ def add_to_cart():
             cart_item = CartProduct(cart_id=cart.id,product_id=product_id,quantity=quantity)
 
         db.session.add(cart_item)
-
-    
-
         db.session.commit()
 
 
         
 
-        db.session.rollback()
 
            
 
@@ -604,6 +600,8 @@ def add_to_cart():
             }
         }), 200
     except Exception as e :
+        
+        db.session.rollback()
         app.logger.error(f"ADD TO CART ERROR :{str(e)}")
         return flask.jsonify({"error":"database issue","details":str(e)})
 
