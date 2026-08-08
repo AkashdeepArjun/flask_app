@@ -24,4 +24,4 @@ class Cart(db.Model):
 
     user:Mapped["User"] = db.relationship('User',back_populates="cart")
     
-    product_items:Mapped[list['CartProduct']] = db.relationship("CartProduct",back_populates="cart")
+    product_items:Mapped[list['CartProduct']] = db.relationship("CartProduct",back_populates="cart",cascade="all, delete-orphan")
