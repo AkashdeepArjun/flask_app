@@ -786,6 +786,7 @@ def place_order():
 @app.route('/my_orders',methods = ['GET'])
 @login_required
 def my_orders():
+    app.logger.info(f" my orders called ")
     try:
         user = flask.g.user
         
