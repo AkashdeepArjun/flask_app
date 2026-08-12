@@ -733,7 +733,7 @@ def place_order():
             })
 
         if not order_items_result:
-            return flask.jsonify({"error":"not valid product found in cart"}),400
+            return flask.jsonify({"status":"failed","reason":"not valid product found in cart"}),400
 
         new_order = Order(user_id = user.id,
                         amount=grand_total,
@@ -764,6 +764,7 @@ def place_order():
     
 
         return flask.jsonify({
+                "status":"ok",
                 "message": "Order placed successfully!",
                 "order_id": new_order.order_id,
                 "total_amount": float(grand_total),
@@ -772,7 +773,7 @@ def place_order():
 
             db.session.rollback()
             app.logger.error(f"ORDER PLACE ISSUE:{str(e)}")
-            return flask.jsonify({"message":"order failed","detail":str(e)})
+            return flask.jsonify({"status":"failed" , "reason":"order failed","detail":str(e)})
 
 
  
