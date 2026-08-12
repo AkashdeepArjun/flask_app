@@ -792,14 +792,15 @@ def my_orders():
         
         if not orders :
             # return flask.render_template("error.html",error="Cart is Empty") 
-            return flask.jsonify({"status":"failed","message":"cart is empty"},400)
+            return flask.jsonify({"status":"failed","reason":"cart is empty"},400)
 
 
-        return  flask.jsonify({"status":"success","orders":[o.to_dict() for o in orders]}),200
+        return  flask.jsonify({"status":"ok","orders":[o.to_dict() for o in orders]}),200
+    
     except Exception as e :
 
         app.logger.error(f"FETCH ORDERS ERROR: {str(e)}")
-        return flask.jsonify({"status":"failed","message":str(e)},400)
+        return flask.jsonify({"status":"failed","reason":str(e)},400)
 
 
 
@@ -844,56 +845,17 @@ def order_details(order_id):
 
 
         if not purchased_products:
-            return flask.jsonify({"error":"not valid purchase found"}),400
+            return flask.jsonify({"status":"failed","reason":"not valid purchase found"}),400
 
         # return flask.jsonify({"data":purchased_products,"message":"orders fetch success"})
         # return flask.render_template("order_detail.html",order_items = purchased_products,total_bill=total_bill)
-        return flask.jsonify({"status":"success","order_items":purchased_products,"total_bill":total_bill}),200
+        return flask.jsonify({"status":"ok","order_items":purchased_products,"total_bill":total_bill}),200
 
     except Exception as e:
 
             app.logger.error(f"ORDER DETAILS ISSUE {str(e)}")
 
-            return flask.jsonify({"status":"failed","message":str(e)}),400
-
-
-
-
-
-    
-
-
-
-
-
-    
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-
-
-
+            return flask.jsonify({"status":"failed","reason":str(e)}),400
 
 
 
