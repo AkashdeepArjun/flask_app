@@ -701,6 +701,7 @@ def place_order():
 
         cart =  user.cart 
 
+        app.logger.log(f"user {user} with cart id {cart.id} is placing order")
         if not cart or not cart.product_items:
 
             return flask.jsonify({"error":"cart is empty"}),400
