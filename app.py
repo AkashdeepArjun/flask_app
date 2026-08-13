@@ -933,6 +933,8 @@ with app.app_context():
 
     from data.RateLimiting import RateLimiting
 
+    from data.ProductImage import ProductImage
+
     # import data.User, data.Product,data.Cart, data.Order, data.OrderProduct, data.CartProduct
 
 
