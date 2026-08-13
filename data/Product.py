@@ -42,6 +42,13 @@ class Product(db.Model):
     cart_items:Mapped[list:['CartProduct']] = db.relationship("CartProduct",back_populates="product")
 
 
+    gallery_images: Mapped[list['ProductImage']] = db.relationship(
+        "ProductImage", 
+        back_populates="product", 
+        cascade="all, delete-orphan"
+    )
+
+
 
   
 
