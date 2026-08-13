@@ -936,10 +936,10 @@ with app.app_context():
     # import data.User, data.Product,data.Cart, data.Order, data.OrderProduct, data.CartProduct
 
 
-    # db.create_all()
+    db.create_all()
 
 
-    # RateLimiting.__table__.create(bind=db.engine, checkfirst=True)
+    RateLimiting.__table__.create(bind=db.engine, checkfirst=True)
     print("Rate limit table initialized successfully!") 
 
 
