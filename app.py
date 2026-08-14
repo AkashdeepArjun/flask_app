@@ -990,6 +990,9 @@ def add_product():
 
         uploaded_files = request.form.getlist('images') or request.form.getlist('file')
 
+        for file in uploaded_files:
+            app.logger.info(file)
+
         saved_images_url =[]
 
         for idx,file_obj in enumerate(uploaded_files):
