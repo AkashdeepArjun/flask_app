@@ -22,6 +22,6 @@ class ProductImage(db.Model):
     #relationship 
 
 
-    product:Mapped['Product'] = db.relationship('Product',back_populates='gallary_images')
+    product:Mapped['Product'] = db.relationship('Product',back_populates='gallery_images') 
 
     
