@@ -9,7 +9,7 @@ from sqlalchemy import String, Text, Numeric, Boolean
 from decimal import Decimal
 # from data.User import User
 class ProductImage(db.Model):
-
+    #just demo
     __tablename__ = 'product_images'
 
     id:Mapped[int] = mapped_column(db.Integer,primary_key=True)
