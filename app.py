@@ -930,7 +930,7 @@ def add_product():
 
         keys = request.form.getlist('json_keys')
 
-        values = request.form.getList('json_values')
+        values = request.form.getlist('json_values')
 
         if keys and values :
 
