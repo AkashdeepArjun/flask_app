@@ -988,7 +988,7 @@ def add_product():
         #multiple images logic 
 
 
-        uploaded_files = request.form.getlist('images') or request.form.getlist('file')
+        uploaded_files = request.files.getlist('images') or request.files.getlist('file')
 
         for file in uploaded_files:
             app.logger.info(file)
