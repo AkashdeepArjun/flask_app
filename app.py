@@ -1019,8 +1019,8 @@ def add_product():
         return flask.jsonify({"status":"ok", "data":{
 
             "product_id":new_product.product_id,
-            "name":new_product.name
-            "images uploaded":len(saved_images_url)
+            "name":new_product.name,
+            "images uploaded":len(saved_images_url),
             'thumbnail':new_product.image_url
 
 
