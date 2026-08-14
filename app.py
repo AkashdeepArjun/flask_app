@@ -975,7 +975,8 @@ def add_product():
             slug =slug,
             specs=specs_dict,
             price=parsed_price,
-            is_active=True
+            is_active=True,
+            created_at=datetime.datetime.now(timezone.utc)
         )
 
         db.session.add(new_product)
