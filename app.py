@@ -903,6 +903,7 @@ def add_product():
 
     try:
 
+        product_id = request.form.get('product_id')
         name = request.form.get("name") or request.form.get("title")
 
         brand  = request.form.get("brand")
@@ -967,6 +968,7 @@ def add_product():
 
 
         new_product = Product(
+            product_id=product_id,
             name=name,
             brand=brand,
             description = description,
