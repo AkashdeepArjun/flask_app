@@ -17,7 +17,7 @@ class Product(db.Model):
 
     __tablename__='products'
 
-    product_id:Mapped[int] = mapped_column(primary_key=True,unique=True)
+    product_id:Mapped[int] =  mapped_column(primary_key=True,unique=True)
     description:Mapped[str] = mapped_column(String(255),nullable=True)
     created_at:Mapped[datetime] =  mapped_column(db.DateTime())
     category_id:Mapped[Optional[int]] = mapped_column(Numeric(10))
@@ -30,7 +30,7 @@ class Product(db.Model):
     brand:Mapped[str] = mapped_column(db.String(255))
     category:Mapped[str] = mapped_column(db.String(255))
     specs:Mapped[dict] = mapped_column(db.JSON())
-
+    stock:Mapped[int] = mapped_column(db.Integer,default=1)
     # relationships 
 
     # order_from:Mapped['Order']=db.relationship('Order',secondary=order_product_relation,back_populates='items')

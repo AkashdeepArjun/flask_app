@@ -11,6 +11,7 @@ from database.InstanceManager import InstanceManager
 from sqlalchemy.exc import IntegrityError
 import traceback
 import datetime
+import re 
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired,Email,Length
 
@@ -61,6 +62,34 @@ message = "default message"
 # UPLOAD_DIRE̥̥̥CTORY = os.path.join(os.path.abspath(os.path.dirname(__file__)),'static','uploads')
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
+
+
+ALLOWED_IMAGE_EXTENSIONS = {'png','jpg','jpeg','webp'}
+
+def allowed_file(filename):
+
+    return '.' in filename and filename.rsplit('.',1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+def gen_slug(text):
+
+    text = text.lower().strip()
+
+    text = re.sub(r'[^\w\s-]','',text)
+
+    text =re.sub(r'[\s_-]','-',text)
+
+    return text
+
+
+
+
+
+
+
+
+
+
+
 
 #testiing flow
 
@@ -863,61 +892,21 @@ def order_details(order_id):
 
 @app.route('/inventory',methods=['POST'])
 @admin_required
-def manage_products():
+def add_product():
 
-    product_id = flask.request.form.get('product_id')
-    product_name = flask.request.form.get("name")
-    product_slug = flask.request.form.get("slug")
-    product_brand = flask.request.form.get("brand")
-    product_price= flask.request.form.get("price")
-    product_category = flask.request.form.get("category")
-    json_info ={}
-    keys = flask.request.form.getlist("json_keys")  
-    values= flask.request.form.getlist("json_values")
+    try:
 
-    for k,v in zip(keys,values):
-        json_info[k.strip()] = v.strip()
+        return flask.jsonify({"status":"ok","message":"product added success"})
 
-    file = flask.request.files['file']
-
-    if file.filename =='':
-        return flask.jsonify({"error":"file is empty"}),500
-    else:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-
-        file.save(file_path)
-
-        new_product = Product(product_id=product_id,
-                                name=product_name,
-                                category=product_category,
-                                specs =json_info,
-                                price=product_price,
-                                slug=product_slug,
-                                image_url=file.filename,
-                                brand=product_brand,
-                                description="",
-                                created_at =datetime.datetime.now()
-                    
-                                )
         
-        # Product.query.add_entity(new_product)
-
-        db.session.add(new_product)
 
 
-        try:
+    except Exception  as e:
 
-            db.session.commit()
-        except IntegrityError as e:
-
-            return   flask.jsonify({"error":"duplicate entry"}),500
+        return flask.jsonify({"status":"failed","reason":str(e)})
 
 
-
-
-        res = flask.jsonify({"message":"product added"}),201
     
-        return res
         # return f"aya dekho kaun"
     
 with app.app_context():
