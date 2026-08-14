@@ -6,12 +6,14 @@ from flask_migrate import Migrate
 from markupsafe import escape
 from pack.mymod import linear_search
 import os 
+import json
 from wtforms import Form,StringField,SubmitField,PasswordField
 from database.InstanceManager import InstanceManager
 from sqlalchemy.exc import IntegrityError
 import traceback
 import datetime
 import re 
+import uuid
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired,Email,Length
 
@@ -64,6 +66,8 @@ message = "default message"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf'}
 
 
+
+
 ALLOWED_IMAGE_EXTENSIONS = {'png','jpg','jpeg','webp'}
 
 def allowed_file(filename):
@@ -76,7 +80,7 @@ def gen_slug(text):
 
     text = re.sub(r'[^\w\s-]','',text)
 
-    text =re.sub(r'[\s_-]','-',text)
+    text =re.sub(r'[\s_-]+','-',text)
 
     return text
 
@@ -309,6 +313,9 @@ app.config['UPLOAD_FOLDER'] = os.path.join(os.path.abspath(os.path.dirname(__fil
 app.config['WTF_CSRF_ENABLED'] = False
 
 app.config["RATELIMIT_ENABLED"] = True
+
+
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 #mail settings 
 # app.config['MAIL_SERVER'] = 'mail.laziakeey.in' 
@@ -896,13 +903,135 @@ def add_product():
 
     try:
 
-        return flask.jsonify({"status":"ok","message":"product added success"})
+        name = request.form.get("name") or request.form.get("title")
+
+        brand  = request.form.get("brand")
+
+        category = request.form.get("category")
+
+        price = request.form.get("price")
+
+        stock = request.form.get("stock",0)
+
+        description = request.form.get("description",0)
+
+        if not all([brand,category,price,name]):
+            return flask.jsonify({"status":"success","reason":"fields brand/category/price/name required"})
+
+
+        
+
+
+        parsed_price  = float(price)
+
+        parse_stock  = int(stock)
+
+        specs_dict = {}
+
+        keys = request.form.getlist('json_keys')
+
+        values = request.form.getList('json_values')
+
+        if keys and values :
+
+            for k,v in zip(keys,values):
+                specs_dict[k.strip()] = v.strip()
+
+        elif 'specs' in request.form:
+            raw_specs = request.form.get('specs')
+            if raw_specs:
+                loaded = json.loads(raw_specs)
+                if isinstance(loaded,dict):
+                    specs_dict = loaded
+
+                elif isinstance(loaded,list):
+
+                    for item in loaded:
+
+                        if isinstance(item,dict) and 'key' in item and 'value' in item:
+
+                            specs_dict[item['key'].strip()] = str(item['value']).strip()
+
+        
+        else:
+            app.logger.info("dunno what happens if no specs provdided")
+
+        slug = request.form.get('slug')
+
+        if not slug or not slug.strip():
+
+            slug = gen_slug(name)
+
+        else:
+            slug = re.sub(r"[\s_-]+",'-',slug.lower().strip())
+
+
+        new_product = Product(
+            name=name,
+            brand=brand,
+            description = description,
+            stock = parse_stock,
+            category=category,
+            slug =slug,
+            specs=specs_dict,
+            price=parsed_price,
+            is_active=True
+        )
+
+        db.session.add(new_product)
+
+        db.session.flush()
+
+        #multiple images logic 
+
+
+        uploaded_files = request.form.getlist('images') or request.form.getlist('file')
+
+        saved_images_url =[]
+
+        for idx,file_obj in enumerate(uploaded_files):
+
+            if file_obj and file_obj.filename and allowed_file(file_obj.filename):
+
+                file_extension = file_obj.filename.rsplit('.',1)[1].lower()
+
+                proper_file_name = f"{uuid.uuid4().hex}_{idx}.{file_extension}"
+
+                file_destination = os.path.join(app.config['UPLOAD_FOLDER'],proper_file_name)
+
+                file_obj.save(file_destination)
+
+
+                saved_file_url = f"/static/uploads/{proper_file_name}"
+
+                saved_images_url.append(saved_file_url)
+
+                if idx==0 and not new_product.image_url:
+
+                    new_product.image_url = saved_file_url
+
+                product_image = ProductImage(product_id=new_product.product_id,image_url=saved_file_url)
+
+                db.session.add(product_image)
+
+        db.session.commit()
+
+        return flask.jsonify({"status":"ok", "data":{
+
+            "product_id":new_product.product_id,
+            "name":new_product.name
+            "images uploaded":len(saved_images_url)
+            'thumbnail':new_product.image_url
+
+
+        },"message":"product added success"}),201
 
         
 
 
     except Exception  as e:
-
+        db.session.rollback()
+        app.logger.error(f"error occured {str(e)}")
         return flask.jsonify({"status":"failed","reason":str(e)})
 
 
