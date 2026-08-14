@@ -941,7 +941,7 @@ with app.app_context():
     # db.create_all()
 
 
-    RateLimiting.__table__.create(bind=db.engine, checkfirst=True)
+    # RateLimiting.__table__.create(bind=db.engine, checkfirst=True)
     print("Rate limit table initialized successfully!") 
 
 

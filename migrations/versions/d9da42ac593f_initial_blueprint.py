@@ -1,8 +1,8 @@
-"""Initial baseline migration
+"""initial blueprint
 
-Revision ID: d6e7935ae145
+Revision ID: d9da42ac593f
 Revises: 
-Create Date: 2026-08-13 15:26:18.205979
+Create Date: 2026-08-14 12:02:49.063339
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'd6e7935ae145'
+revision = 'd9da42ac593f'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,6 +33,13 @@ def upgrade():
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('order_id')
     )
+    op.create_table('product_images',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('product_id', sa.Integer(), nullable=False),
+    sa.Column('image_url', sa.String(length=255), nullable=False),
+    sa.ForeignKeyConstraint(['product_id'], ['products.product_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
     op.create_table('cart_product',
     sa.Column('cart_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
@@ -50,41 +57,41 @@ def upgrade():
     sa.ForeignKeyConstraint(['product_id'], ['products.product_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('order_id', 'product_id')
     )
-    op.drop_table('migrations')
-    with op.batch_alter_table('failed_jobs', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('failed_jobs_uuid_unique'))
+    with op.batch_alter_table('sessions', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('sessions_last_activity_index'))
+        batch_op.drop_index(batch_op.f('sessions_user_id_index'))
 
-    op.drop_table('failed_jobs')
+    op.drop_table('sessions')
+    op.drop_table('job_batches')
     with op.batch_alter_table('dev.users', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('email'))
         batch_op.drop_index(batch_op.f('remember_token'))
 
     op.drop_table('dev.users')
-    with op.batch_alter_table('cache_locks', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('cache_locks_expiration_index'))
-
-    op.drop_table('cache_locks')
-    op.drop_table('job_batches')
-    with op.batch_alter_table('jobs', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('jobs_queue_index'))
-
-    op.drop_table('jobs')
-    with op.batch_alter_table('cache', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('cache_expiration_index'))
-
-    op.drop_table('cache')
-    op.drop_table('password_reset_tokens')
     with op.batch_alter_table('personal_access_tokens', schema=None) as batch_op:
         batch_op.drop_index(batch_op.f('personal_access_tokens_expires_at_index'))
         batch_op.drop_index(batch_op.f('personal_access_tokens_token_unique'))
         batch_op.drop_index(batch_op.f('personal_access_tokens_tokenable_type_tokenable_id_index'))
 
     op.drop_table('personal_access_tokens')
-    with op.batch_alter_table('sessions', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('sessions_last_activity_index'))
-        batch_op.drop_index(batch_op.f('sessions_user_id_index'))
+    op.drop_table('password_reset_tokens')
+    with op.batch_alter_table('cache_locks', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('cache_locks_expiration_index'))
 
-    op.drop_table('sessions')
+    op.drop_table('cache_locks')
+    with op.batch_alter_table('failed_jobs', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('failed_jobs_uuid_unique'))
+
+    op.drop_table('failed_jobs')
+    with op.batch_alter_table('jobs', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('jobs_queue_index'))
+
+    op.drop_table('jobs')
+    op.drop_table('migrations')
+    with op.batch_alter_table('cache', schema=None) as batch_op:
+        batch_op.drop_index(batch_op.f('cache_expiration_index'))
+
+    op.drop_table('cache')
     with op.batch_alter_table('products', schema=None) as batch_op:
         batch_op.add_column(sa.Column('product_id', sa.Integer(), nullable=False))
         batch_op.add_column(sa.Column('category_id', sa.Numeric(precision=10), nullable=True))
@@ -190,22 +197,80 @@ def downgrade():
         batch_op.drop_column('category_id')
         batch_op.drop_column('product_id')
 
-    op.create_table('sessions',
-    sa.Column('id', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('user_id', mysql.BIGINT(unsigned=True), autoincrement=False, nullable=True),
-    sa.Column('ip_address', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=45), nullable=True),
-    sa.Column('user_agent', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('payload', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('last_activity', mysql.INTEGER(), autoincrement=False, nullable=False),
+    op.create_table('cache',
+    sa.Column('key', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('value', mysql.MEDIUMTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('expiration', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.PrimaryKeyConstraint('key'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    with op.batch_alter_table('cache', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('cache_expiration_index'), ['expiration'], unique=False)
+
+    op.create_table('migrations',
+    sa.Column('id', mysql.INTEGER(unsigned=True), autoincrement=True, nullable=False),
+    sa.Column('migration', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('batch', mysql.INTEGER(), autoincrement=False, nullable=False),
     sa.PrimaryKeyConstraint('id'),
     mysql_collate='utf8mb4_unicode_ci',
     mysql_default_charset='utf8mb4',
     mysql_engine='InnoDB'
     )
-    with op.batch_alter_table('sessions', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('sessions_user_id_index'), ['user_id'], unique=False)
-        batch_op.create_index(batch_op.f('sessions_last_activity_index'), ['last_activity'], unique=False)
+    op.create_table('jobs',
+    sa.Column('id', mysql.BIGINT(unsigned=True), autoincrement=True, nullable=False),
+    sa.Column('queue', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('payload', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('attempts', mysql.TINYINT(unsigned=True), autoincrement=False, nullable=False),
+    sa.Column('reserved_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=True),
+    sa.Column('available_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=False),
+    sa.Column('created_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    with op.batch_alter_table('jobs', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('jobs_queue_index'), ['queue'], unique=False)
 
+    op.create_table('failed_jobs',
+    sa.Column('id', mysql.BIGINT(unsigned=True), autoincrement=True, nullable=False),
+    sa.Column('uuid', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('connection', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('queue', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('payload', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('exception', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('failed_at', mysql.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    with op.batch_alter_table('failed_jobs', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('failed_jobs_uuid_unique'), ['uuid'], unique=True)
+
+    op.create_table('cache_locks',
+    sa.Column('key', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('owner', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('expiration', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.PrimaryKeyConstraint('key'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    with op.batch_alter_table('cache_locks', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('cache_locks_expiration_index'), ['expiration'], unique=False)
+
+    op.create_table('password_reset_tokens',
+    sa.Column('email', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('token', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('created_at', mysql.TIMESTAMP(), nullable=True),
+    sa.PrimaryKeyConstraint('email'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
     op.create_table('personal_access_tokens',
     sa.Column('id', mysql.BIGINT(unsigned=True), autoincrement=True, nullable=False),
     sa.Column('tokenable_type', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
@@ -227,71 +292,6 @@ def downgrade():
         batch_op.create_index(batch_op.f('personal_access_tokens_token_unique'), ['token'], unique=True)
         batch_op.create_index(batch_op.f('personal_access_tokens_expires_at_index'), ['expires_at'], unique=False)
 
-    op.create_table('password_reset_tokens',
-    sa.Column('email', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('token', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('created_at', mysql.TIMESTAMP(), nullable=True),
-    sa.PrimaryKeyConstraint('email'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
-    op.create_table('cache',
-    sa.Column('key', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('value', mysql.MEDIUMTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('expiration', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.PrimaryKeyConstraint('key'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
-    with op.batch_alter_table('cache', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('cache_expiration_index'), ['expiration'], unique=False)
-
-    op.create_table('jobs',
-    sa.Column('id', mysql.BIGINT(unsigned=True), autoincrement=True, nullable=False),
-    sa.Column('queue', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('payload', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('attempts', mysql.TINYINT(unsigned=True), autoincrement=False, nullable=False),
-    sa.Column('reserved_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=True),
-    sa.Column('available_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=False),
-    sa.Column('created_at', mysql.INTEGER(unsigned=True), autoincrement=False, nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
-    with op.batch_alter_table('jobs', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('jobs_queue_index'), ['queue'], unique=False)
-
-    op.create_table('job_batches',
-    sa.Column('id', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('name', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('total_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.Column('pending_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.Column('failed_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.Column('failed_job_ids', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('options', mysql.MEDIUMTEXT(collation='utf8mb4_unicode_ci'), nullable=True),
-    sa.Column('cancelled_at', mysql.INTEGER(), autoincrement=False, nullable=True),
-    sa.Column('created_at', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.Column('finished_at', mysql.INTEGER(), autoincrement=False, nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
-    op.create_table('cache_locks',
-    sa.Column('key', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('owner', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('expiration', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.PrimaryKeyConstraint('key'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
-    with op.batch_alter_table('cache_locks', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('cache_locks_expiration_index'), ['expiration'], unique=False)
-
     op.create_table('dev.users',
     sa.Column('id', mysql.INTEGER(), autoincrement=True, nullable=False),
     sa.Column('email', mysql.VARCHAR(length=255), nullable=False),
@@ -312,33 +312,41 @@ def downgrade():
         batch_op.create_index(batch_op.f('remember_token'), ['remember_token'], unique=True)
         batch_op.create_index(batch_op.f('email'), ['email'], unique=True)
 
-    op.create_table('failed_jobs',
-    sa.Column('id', mysql.BIGINT(unsigned=True), autoincrement=True, nullable=False),
-    sa.Column('uuid', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('connection', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('queue', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    op.create_table('job_batches',
+    sa.Column('id', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('name', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('total_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('pending_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('failed_jobs', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('failed_job_ids', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
+    sa.Column('options', mysql.MEDIUMTEXT(collation='utf8mb4_unicode_ci'), nullable=True),
+    sa.Column('cancelled_at', mysql.INTEGER(), autoincrement=False, nullable=True),
+    sa.Column('created_at', mysql.INTEGER(), autoincrement=False, nullable=False),
+    sa.Column('finished_at', mysql.INTEGER(), autoincrement=False, nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    mysql_collate='utf8mb4_unicode_ci',
+    mysql_default_charset='utf8mb4',
+    mysql_engine='InnoDB'
+    )
+    op.create_table('sessions',
+    sa.Column('id', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
+    sa.Column('user_id', mysql.BIGINT(unsigned=True), autoincrement=False, nullable=True),
+    sa.Column('ip_address', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=45), nullable=True),
+    sa.Column('user_agent', mysql.TEXT(collation='utf8mb4_unicode_ci'), nullable=True),
     sa.Column('payload', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('exception', mysql.LONGTEXT(collation='utf8mb4_unicode_ci'), nullable=False),
-    sa.Column('failed_at', mysql.TIMESTAMP(), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+    sa.Column('last_activity', mysql.INTEGER(), autoincrement=False, nullable=False),
     sa.PrimaryKeyConstraint('id'),
     mysql_collate='utf8mb4_unicode_ci',
     mysql_default_charset='utf8mb4',
     mysql_engine='InnoDB'
     )
-    with op.batch_alter_table('failed_jobs', schema=None) as batch_op:
-        batch_op.create_index(batch_op.f('failed_jobs_uuid_unique'), ['uuid'], unique=True)
+    with op.batch_alter_table('sessions', schema=None) as batch_op:
+        batch_op.create_index(batch_op.f('sessions_user_id_index'), ['user_id'], unique=False)
+        batch_op.create_index(batch_op.f('sessions_last_activity_index'), ['last_activity'], unique=False)
 
-    op.create_table('migrations',
-    sa.Column('id', mysql.INTEGER(unsigned=True), autoincrement=True, nullable=False),
-    sa.Column('migration', mysql.VARCHAR(collation='utf8mb4_unicode_ci', length=255), nullable=False),
-    sa.Column('batch', mysql.INTEGER(), autoincrement=False, nullable=False),
-    sa.PrimaryKeyConstraint('id'),
-    mysql_collate='utf8mb4_unicode_ci',
-    mysql_default_charset='utf8mb4',
-    mysql_engine='InnoDB'
-    )
     op.drop_table('order_product')
     op.drop_table('cart_product')
+    op.drop_table('product_images')
     op.drop_table('orders')
     op.drop_table('carts')
     # ### end Alembic commands ###
