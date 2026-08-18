@@ -928,7 +928,7 @@ def add_product():
     
 
         # if not all([brand,category,price,name]):
-            return flask.jsonify({"status":"success","reason":"fields brand/category/price/name required"})
+            # return flask.jsonify({"status":"success","reason":"fields brand/category/price/name required"})
 
         if len(empty_fields)>0:
             app.logger.info(empty_fields)
