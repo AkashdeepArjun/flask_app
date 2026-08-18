@@ -906,6 +906,7 @@ def add_product():
     try:
 
         product_id = request.form.get('product_id')
+
         name = request.form.get("name") or request.form.get("title")
 
         brand  = request.form.get("brand")
@@ -918,10 +919,20 @@ def add_product():
 
         description = request.form.get("description",0)
 
-        if not all([brand,category,price,name]):
+        empty_fields =[]
+
+        for field in [product_id,name,brand,category,price,stock,description]:
+
+            if not field:
+                empty_fields.append(field)
+    
+
+        # if not all([brand,category,price,name]):
             return flask.jsonify({"status":"success","reason":"fields brand/category/price/name required"})
 
-
+        if len(empty_fields)>0:
+            app.logger.info(empty_fields)
+            return flask.jsonify({"Status":"failed","fields":empty_fields})
         
 
 
