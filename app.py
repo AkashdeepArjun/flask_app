@@ -901,6 +901,8 @@ def order_details(order_id):
 @admin_required
 def add_product():
 
+    app.logger.info(f"request is being sent here ")
+
     try:
 
         product_id = request.form.get('product_id')
