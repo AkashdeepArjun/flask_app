@@ -1062,7 +1062,7 @@ def add_product():
 
 # GET PRODUCT IMAGES 
 
-@app.route('/inventory/<product_id:int>/images')
+@app.route('/inventory/<int:product_id>/images')
 def fetch_images(product_id):
 
     try:
