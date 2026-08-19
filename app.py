@@ -897,6 +897,8 @@ def order_details(order_id):
 
 
 
+# ADDING NEW PRODUCT IN INVENTORY 
+
 @app.route('/inventory',methods=['POST'])
 @admin_required
 def add_product():
@@ -1056,6 +1058,38 @@ def add_product():
 
     
         # return f"aya dekho kaun"
+
+
+# GET PRODUCT IMAGES 
+
+@app.route('/inventory/<product_id:int>/images')
+def fetch_images(product_id):
+
+    try:
+
+        products = ProductImage.query.filter_by(product_id=product_id).all()
+
+        if not products:
+            return flask.jsonify({"status":"failed","reason":"no products with id found"}),400
+
+        images =[p.image_url for p in products]
+
+        if images :
+            return flask.jsonify({"status":"ok","images":images}),200
+
+        else:
+            return flask.jsonify({"status":"failed","reason":"could not fetch images"}),400
+        
+
+    except Exception as e:
+
+        return flask.jsonify({"status":"failed","reason":str(e)}),400
+
+
+
+
+
+
     
 with app.app_context():
     # just added context"
@@ -1235,7 +1269,7 @@ def get_products():
 
             # return jsonify({"products":products})
             # return flask.render_template("products.html",user=user_obj, products=products,pagination=pagination)
-        return flask.jsonify({"status":"success","products":[p.to_dict() for p in products],"pagination": {
+        return flask.jsonify({"status":"success","products":[p.to_dict(include_images=True) for p in products],"pagination": {
               "page": pagination.page,
               "per_page": pagination.per_page,
               "total_items": pagination.total,

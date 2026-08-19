@@ -53,7 +53,7 @@ class Product(db.Model):
   
 
 
-    def to_dict(self):
+    def to_dict(self,include_images=False):
         data = {}
         for column in self.__table__.columns:
             val = getattr(self, column.name)
@@ -66,5 +66,9 @@ class Product(db.Model):
                 val = val.isoformat()
 
             data[column.name] = val
+
+            if include_images:
+                data['images']=[img.image_url for img in self.gallery_images]
+
         return data
         
