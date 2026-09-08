@@ -170,7 +170,7 @@ def db_rate_limit(max_requests:int=5,window_in_seconds:int=60):
 
 from functools import wraps
 import time
-from flask import jsonify, request
+from flask import g, jsonify, make_response, request, session
 
 # Simple in-memory rate storage: { ip: [timestamp1, timestamp2, ...] }
 rate_store = {}
@@ -522,29 +522,38 @@ db.init_app(app)
 migrate = Migrate(app, db)
 InstanceManager._instances[SQLAlchemy] = db
 
+
 @app.before_request
-def load_current_user():
+def handle_preflight_and_load_user():
+    # 1. Handle preflight OPTIONS requests immediately
+    if request.method == 'OPTIONS':
+        response = make_response()
+        origin = request.headers.get('Origin', 'http://localhost:5173')
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response, 200
 
-    name = flask.session.get('user')
-
+    # 2. For actual requests (GET, POST, etc.), load session user
+    name = session.get('user')
     if not name:
-        flask.g.user=None
-
+        g.user = None
     else:
-        flask.g.user = User.query.filter_by(username=name).first()
-        # flask.g.user.rol
+        g.user = User.query.filter_by(username=name).first()
+
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    # Dynamically allow the requesting origin (needed when Access-Control-Allow-Credentials is true)
+    origin = request.headers.get('Origin')
+    if origin:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
     response.headers['Access-Control-Allow-Credentials'] = 'true'
     return response
-
-
-
-
 
 def admin_required(f):
     @wraps(f)
