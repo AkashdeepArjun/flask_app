@@ -1001,6 +1001,9 @@ def add_product():
         db.session.flush()
 
         #multiple images logic 
+        app.logger.info(f"request.files keys:{list(request.files.keys())}")
+        app.logger.info(f"Raw images getlist: {request.files.getlist('images')}")
+        app.logger.info(f"Raw file getlist:{ request.files.getlist('file')}")
 
 
         uploaded_files = request.files.getlist('images') or request.files.getlist('file')
