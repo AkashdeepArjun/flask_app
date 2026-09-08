@@ -297,9 +297,16 @@ except Exception as e:
     print("ERRORRRR {} ".format(e))
 
 
+
 app.config.update(
-    TESTING=True,
-    SECRET_KEY='akeeydemoproject007'
+    TESTING=False, # Set to False in production
+    SECRET_KEY='akeeydemoproject007',
+    
+    # Session Cookie Settings for Production / Hosting
+    SESSION_COOKIE_HTTPONLY=True,   # Prevents client-side JS from reading cookie
+    SESSION_COOKIE_SECURE=True,     # Tells browser cookie is only transmitted over HTTPS
+    SESSION_COOKIE_SAMESITE='Lax',  # Allows cookie to be sent on same-site API requests
+    SESSION_COOKIE_DOMAIN=None      # Lets browser auto-bind to the exact host domain
 )
 
 # DATABASE SETTINGS 
